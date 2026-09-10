@@ -1,2 +1,29 @@
-.vagrant
+# Kompilerede binære filer og objekter
+server
+*.o
+*.so
+*.dylib
+
+# macOS artefakter
 .DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Windows / editor artefakter
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDE og config-mapper
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Vagrant
+.vagrant/
+
+# Lokale test-scripts og logs
+*.log
