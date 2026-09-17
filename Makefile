@@ -1,6 +1,7 @@
 CC ?= gcc
-CFLAGS = -Wall -Wextra -O3 -pthread
+CFLAGS = -Wall -Wextra -O3 -pthread -Iinclude
 LDFLAGS = -pthread
+LDLIBS = -lcrypto
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
@@ -17,7 +18,7 @@ TARGET = server
 
 all: $(TARGET)
 
-$(TARGET): server.c messages.h lonesha256.h
+$(TARGET): server.c include/messages.h
 	$(CC) $(CFLAGS) -o $(TARGET) server.c $(LDFLAGS) $(LDLIBS)
 
 clean:

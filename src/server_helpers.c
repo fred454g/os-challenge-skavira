@@ -4,7 +4,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-ssize_t read_incoming() {
-    return 0;
-}
+// We have to take in the func call and guess
+// [0-31] Sha256 what we have to reverse hash
+// [32-39] minVal of guess.   [40-47]maxVal of guess.
+// [48] prio least(0->16)most
+
 

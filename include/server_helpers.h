@@ -6,6 +6,6 @@
 #include <stddef.h>
 #include <sys/types.h> 
 
-ssize_t read_exact(int fd, void *buf, size_t count);
+//functions here:
 
 #endif 
