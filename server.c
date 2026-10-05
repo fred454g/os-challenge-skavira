@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 
 /*
@@ -26,7 +27,7 @@ Client                              Server
    [48] prio least(0->16)most
 */
 
-int main(int argc, char const *argv[]){
+int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much noise
     if(argc != 2){ //Expect argv[0] ex: "./server" to be name and argv[1] to be port ex: "5003"
         fprintf(stderr, "We didn't recieve expected package - program name: %s", argv[0]);
         exit(EXIT_FAILURE);
@@ -121,18 +122,59 @@ int main(int argc, char const *argv[]){
         }
 
         // TODO: Find solution before connection closes
+        // TODO: Refactor this to a helper.
         // LSHA256DEF int lonesha256 (unsigned char out[32], const unsigned char* in, size_t len)
-        uint64_t guess = 1;
-        u_int64_t little_endian_guess = htole64(guess);
-        unsigned char calculated_hash[32];
+        uint64_t lower_guess_big_endian;
+        uint64_t upper_guess_big_endian;
 
-        lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
+        memcpy(&lower_guess_big_endian, buffer + PACKET_REQUEST_START_OFFSET, sizeof(lower_guess_big_endian));
+        memcpy(&upper_guess_big_endian, buffer + PACKET_REQUEST_END_OFFSET, sizeof(upper_guess_big_endian));
 
-        if (memcmp(calculated_hash, buffer + PACKET_REQUEST_HASH_OFFSET, sizeof(calculated_hash)) == 0) {
-            printf("number %ld is correct!\n", guess);
+        uint64_t min_val = be64toh(lower_guess_big_endian);
+        uint64_t max_val = be64toh(upper_guess_big_endian);
+
+        //uint8_t prio = buffer[PACKET_REQUEST_PRIO_OFFSET]; TODO: Implement prio
+
+        int found = 0;
+        u_int64_t answer = 0;
+
+        for (uint64_t guess = min_val; guess < max_val; guess++){ //TODO: Implement better guessing algorithm
+            uint64_t little_endian_guess = htole64(guess);
+            unsigned char calculated_hash[32];
+            lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
+
+            if (memcmp(calculated_hash, buffer + PACKET_REQUEST_HASH_OFFSET, sizeof(calculated_hash)) == 0) {
+                printf("number %" PRIu64 " is correct!\n", guess);
+                found = 1;
+                answer = guess;
+                break;
+            }
+        }
+        if (found){
+            uint64_t answer_big_endian = htobe64(answer);
+            size_t sent = 0;
+
+            while (sent < sizeof(answer_big_endian))
+            {
+                ssize_t n = send(client_filedescriptor, 
+                    (const unsigned char *)&answer_big_endian + sent, sizeof(answer_big_endian) - sent, 0);
+                if (n == -1) {
+                    if (errno == EINTR) {
+                        continue;
+                    }
+                    perror("send");
+                    break;
+                }
+
+                if (n == 0) {
+                    break;
+                }
+                sent += (size_t)n;
+            }
+        } else {
+            fprintf(stderr, "No matching number found in the requested range\n");
         }
         close(client_filedescriptor);
-
     }
 
 }
