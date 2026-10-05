@@ -36,7 +36,7 @@ Run the commands from the project root.
 ```sh
 make clean && make
 ./server 8080
-````
+```
 
 **Terminal 2 – Send a simple request:**
 ```sh
@@ -51,11 +51,48 @@ The server should print `Recieved 49 bytes:` followed by the packet contents. Th
 After code changes: stop the server with `Ctrl+C`, run `make clean && make`, and start it again.
 No native macOS client for Intel is provided; use the VM flow there instead.
 
-## VM Flow and Directory Mapping
+# Mac
 
 Requires Vagrant and the VMware Desktop provider for `arm64/` or VirtualBox for `x86_64/`.
 Run `vagrant up` from the relevant directory and open two terminals using `vagrant ssh server` and `vagrant ssh client` respectively from the same directory.
 
 The project root is shared as `/home/vagrant/os-challenge-common/` in both VMs.
-Go to that directory in both terminals. On the server: install `libssl-dev`, run `make clean && make`, and start `./server 5003`. On the client: run `chmod +x "$(./get-bin-path.sh)/client"` followed by `./run-client.sh`.
-The script uses server IP `192.168.101.10` and port `5003`; the client VM has IP `192.168.101.11`. Edit the files on the host and rebuild in the server VM.
+Install `libssl-dev` in the server VM if it is not already installed: `sudo apt install libssl-dev`.
+
+If both VM terminals are already open, use the following commands.
+
+**Server terminal (`vagrant ssh server`) – start this first:**
+
+```sh
+cd /home/vagrant/os-challenge-common
+make clean && make
+./server 5003
+```
+
+**Client terminal (`vagrant ssh client`):**
+
+```sh
+cd /home/vagrant/os-challenge-common
+chmod +x "$(./get-bin-path.sh)/client"
+./run-client.sh
+```
+
+Keep the server running while the client sends requests. Run `./run-client.sh` again to repeat the test.
+The script uses server IP `192.168.101.10` and port `5003`; the client VM has IP `192.168.101.11`.
+
+After code changes on the host, stop the server with `Ctrl+C`, run `make clean && make` in the server VM, and start it again with `./server 5003`.
+
+## Stopping the client, server, and VMs
+
+1. Let the client finish its requests and return to the prompt. To interrupt a running or stuck client, press `Ctrl+C` in the client terminal.
+2. Once the client has finished, press `Ctrl+C` in the server terminal. The server does not currently have a graceful shutdown handler, so let requests finish before stopping it.
+3. Run `exit` in both terminals to leave the SSH sessions. This disconnects the terminals but leaves the VMs running.
+4. To shut down both VMs cleanly, run the following on your Mac from the same `arm64/` or `x86_64/` directory where you ran `vagrant up`:
+
+   ```sh
+   vagrant halt
+   ```
+
+Use `vagrant up` from that directory to start the VMs again, then reconnect with `vagrant ssh server` and `vagrant ssh client` and run the startup commands above.
+
+# Windows local dev
