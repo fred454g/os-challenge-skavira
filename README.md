@@ -77,6 +77,8 @@ chmod +x "$(./get-bin-path.sh)/client"
 ./run-client.sh
 ```
 
+![alt text](image.png)
+
 Keep the server running while the client sends requests. Run `./run-client.sh` again to repeat the test.
 The script uses server IP `192.168.101.10` and port `5003`; the client VM has IP `192.168.101.11`.
 

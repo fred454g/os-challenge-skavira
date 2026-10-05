@@ -76,7 +76,7 @@ int main(int argc, char const *argv[]){
     for(;;){
         int client_filedescriptor = accept(server_filedescriptor, NULL, NULL); //Waits for client
         if (client_filedescriptor == -1){
-            if (errno == EINTR) {
+            if (errno == EINTR) { //Continue after blocking signal
                 continue;
             }
             perror("accept");
@@ -121,6 +121,16 @@ int main(int argc, char const *argv[]){
         }
 
         // TODO: Find solution before connection closes
+        // LSHA256DEF int lonesha256 (unsigned char out[32], const unsigned char* in, size_t len)
+        uint64_t guess = 1;
+        u_int64_t little_endian_guess = htole64(guess);
+        unsigned char calculated_hash[32];
+
+        lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
+
+        if (memcmp(calculated_hash, buffer + PACKET_REQUEST_HASH_OFFSET, sizeof(calculated_hash)) == 0) {
+            printf("number %ld is correct!\n", guess);
+        }
         close(client_filedescriptor);
 
     }
