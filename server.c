@@ -121,7 +121,6 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
             fflush(stdout);
         }
 
-        // TODO: Find solution before connection closes
         // TODO: Refactor this to a helper.
         // LSHA256DEF int lonesha256 (unsigned char out[32], const unsigned char* in, size_t len)
         uint64_t lower_guess_big_endian;
