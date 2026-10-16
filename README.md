@@ -27,8 +27,7 @@ The client sends the interval boundaries in big-endian. The expected response is
 
 ## Run Locally
 
-Requires a C compiler, `make`, and OpenSSL. On macOS: `brew install openssl@3`.
-On Ubuntu/Debian: `sudo apt install build-essential libssl-dev`.
+Requires a C compiler and `make`.
 Run the commands from the project root.
 
 **Terminal 1 – Build and start the server:**
@@ -57,7 +56,6 @@ Requires Vagrant and the VMware Desktop provider for `arm64/` or VirtualBox for 
 Run `vagrant up` from the relevant directory and open two terminals using `vagrant ssh server` and `vagrant ssh client` respectively from the same directory.
 
 The project root is shared as `/home/vagrant/os-challenge-common/` in both VMs.
-Install `libssl-dev` in the server VM if it is not already installed: `sudo apt install libssl-dev`.
 
 If both VM terminals are already open, use the following commands.
 
