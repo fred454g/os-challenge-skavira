@@ -59,7 +59,7 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server_filedescriptor, 16) == -1) {
+    if (listen(server_filedescriptor, 128) == -1) {
         perror("listen");
         close(server_filedescriptor);
         exit(EXIT_FAILURE);
