@@ -8,12 +8,8 @@
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
-// We have to take in the func call and guess
-// [0-31] Sha256 what we have to reverse hash
-// [32-39] minVal of guess.   [40-47]maxVal of guess.
-// [48] prio least(0->16)most
-// Maybe delete the comments above??
-
+#include <string.h>
+#include <errno.h>
 
 /* This function:
 1. takes a port number
@@ -21,7 +17,7 @@
 3. configures the socket to accept all server-vm's local IPv4 adresses, on the specified port
 4. binds the port to the socket
 5. begins listening on the specified port on all local IPv4 adresses
-*/
+6. returns the socket file descriptor*/
 int create_listening_socket(long port) {
 
     //Create a TCP socket
@@ -50,5 +46,66 @@ int create_listening_socket(long port) {
     }
 
     return server_filedescriptor;
+}
+
+/* This function:
+1. takes a client fd(filedescription) and a pointer to a request struct
+2. Creates a buffer and fills it with the incomming request
+3. Checks for errors
+4. Prints out the received hash in the terminal
+5. Fills out the request struct with the incomming data
+6. returns 1 if we received a full request, 0 if not*/
+bool read_request(int client_fd, struct request* req) {
+    unsigned char buffer[PACKET_REQUEST_SIZE];
+    size_t recieved = 0;
+
+    //TCP can deliver in different parts
+    while (recieved < sizeof(buffer)){
+        ssize_t n = recv(
+            client_fd, //read from
+            buffer + recieved, // write first available space in buffer
+            sizeof(buffer) - recieved, //recieve MAXX bytes allocated
+            0 //recieve as normal
+        );
+
+        if (n == 0) {
+            fprintf(stderr, "Client disconnected. All data shoul d be recieved\n");
+            break;
+        }
+
+        if (n == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            perror("recv");
+            break;
+        }
+        recieved += (size_t)n;
+    }
+
+    if (recieved == sizeof(buffer)) {
+        printf("Recieved %zu bytes:\n", recieved);
+
+        for (size_t i = 0; i < recieved; i++) {
+            printf("%02x ", (unsigned int)buffer[i]);
+        }
+        printf("\n");
+        fflush(stdout);
+    }
+
+    memcpy(req->hash, buffer + PACKET_REQUEST_HASH_OFFSET, sizeof(req->hash));
+
+    uint64_t lower_guess_big_endian;
+    uint64_t upper_guess_big_endian;
+
+    memcpy(&lower_guess_big_endian, buffer + PACKET_REQUEST_START_OFFSET, sizeof(lower_guess_big_endian));
+    memcpy(&upper_guess_big_endian, buffer + PACKET_REQUEST_END_OFFSET, sizeof(upper_guess_big_endian));
+
+    req->start = be64toh(lower_guess_big_endian);
+    req->end   = be64toh(upper_guess_big_endian);
+
+    req->prio  = buffer[PACKET_REQUEST_PRIO_OFFSET];
+
+    return recieved == sizeof(buffer);
 }
 

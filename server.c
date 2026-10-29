@@ -15,6 +15,8 @@
 #include <inttypes.h>
 
 
+
+
 /*
 Client                              Server
    |── create TCP-forbindelse ──────────>|
@@ -63,64 +65,19 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
             exit(EXIT_FAILURE);
         }
 
-        unsigned char buffer[PACKET_REQUEST_SIZE];
-        size_t recieved = 0;
-
-        //TCP can deliver in different parts
-        while (recieved < sizeof(buffer)){
-            ssize_t n = recv(
-                client_filedescriptor, //read from
-                buffer + recieved, // write first available space in buffer
-                sizeof(buffer) - recieved, //recieve MAXX bytes allocated
-                0 //recieve as normal
-            );
-
-            if (n == 0) {
-                fprintf(stderr, "Client disconnected. All data shoul d be recieved\n");
-                break;
-            }
-
-            if (n == -1) {
-                if (errno == EINTR) {
-                    continue;
-                }
-                perror("recv");
-                break;
-            }
-            recieved += (size_t)n;
-        }
-        if (recieved == sizeof(buffer)) {
-            printf("Recieved %zu bytes:\n", recieved);
-
-            for (size_t i = 0; i < recieved; i++) {
-                printf("%02x ", (unsigned int)buffer[i]);
-            }
-            printf("\n");
-            fflush(stdout);
-        }
-
-        // TODO: Refactor this to a helper.
-        // LSHA256DEF int lonesha256 (unsigned char out[32], const unsigned char* in, size_t len)
-        uint64_t lower_guess_big_endian;
-        uint64_t upper_guess_big_endian;
-
-        memcpy(&lower_guess_big_endian, buffer + PACKET_REQUEST_START_OFFSET, sizeof(lower_guess_big_endian));
-        memcpy(&upper_guess_big_endian, buffer + PACKET_REQUEST_END_OFFSET, sizeof(upper_guess_big_endian));
-
-        uint64_t min_val = be64toh(lower_guess_big_endian);
-        uint64_t max_val = be64toh(upper_guess_big_endian);
-
-        //uint8_t prio = buffer[PACKET_REQUEST_PRIO_OFFSET]; TODO: Implement prio
+        // Creates a request datatype, and calls read_request() to fill out request with incoming datapackage
+        struct request req;
+        read_request(client_filedescriptor, &req);
 
         int found = 0;
         u_int64_t answer = 0;
 
-        for (uint64_t guess = min_val; guess < max_val; guess++){ //TODO: Implement better guessing algorithm
+        for (uint64_t guess = req.start; guess < req.end; guess++){ //TODO: Implement better guessing algorithm
             uint64_t little_endian_guess = htole64(guess);
             unsigned char calculated_hash[32];
             lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
 
-            if (memcmp(calculated_hash, buffer + PACKET_REQUEST_HASH_OFFSET, sizeof(calculated_hash)) == 0) {
+            if (memcmp(calculated_hash, req.hash, sizeof(calculated_hash)) == 0) {
                 printf("number %" PRIu64 " is correct!\n", guess);
                 found = 1;
                 answer = guess;
