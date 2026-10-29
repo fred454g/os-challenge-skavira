@@ -68,26 +68,7 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
         
         // if find_answer returns true, a match is found and the value is returned to the client
         if (find_answer(&req, &answer)){
-            uint64_t answer_big_endian = htobe64(answer);
-            size_t sent = 0;
-
-            while (sent < sizeof(answer_big_endian))
-            {
-                ssize_t n = send(client_filedescriptor, 
-                    (const unsigned char *)&answer_big_endian + sent, sizeof(answer_big_endian) - sent, 0);
-                if (n == -1) {
-                    if (errno == EINTR) {
-                        continue;
-                    }
-                    perror("send");
-                    break;
-                }
-
-                if (n == 0) {
-                    break;
-                }
-                sent += (size_t)n;
-            }
+            send_answer(client_filedescriptor, answer);
         } else {
             fprintf(stderr, "No matching number found in the requested range\n");
         }

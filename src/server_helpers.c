@@ -114,7 +114,7 @@ bool read_request(int client_fd, struct request* req) {
 }
 
 /* This function:
-1. takes a pointer to a strcut request and a u-integer 32 bit answer pointer
+1. takes a pointer to a strcut request and a u-integer 64 bit answer pointer
 2. it takes the request and guesses on hashes between start and end in datapackage
 3. if it is a match, the guessed number is printed to the terminal
 4. returns true if a match is found, false if not*/
@@ -131,4 +131,32 @@ bool find_answer(const struct request* req, uint64_t* answer) {
         }
     }
     return false;
+}
+
+/*This function:
+1. takes a client fd(filedescription) and a u-integer 64 bit answer
+2. it converts it to big-endian msb convention
+2. sends untill "send" sys-call has transfered all 8 bytes 
+3. returns nothing*/
+void send_answer(int client_fd, uint64_t answer) {
+    uint64_t answer_big_endian = htobe64(answer);
+    size_t sent = 0;
+
+    while (sent < sizeof(answer_big_endian))
+    {
+        ssize_t n = send(client_fd, 
+            (const unsigned char *)&answer_big_endian + sent, sizeof(answer_big_endian) - sent, 0);
+        if (n == -1) {
+            if (errno == EINTR) {
+                continue;
+            }
+            perror("send");
+            break;
+        }
+
+        if (n == 0) {
+            break;
+        }
+        sent += (size_t)n;
+    }
 }

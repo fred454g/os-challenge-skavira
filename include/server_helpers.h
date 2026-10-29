@@ -42,4 +42,11 @@ bool read_request(int client_fd, struct request* req);
 4. returns true if a match is found, false if not*/
 bool find_answer(const struct request* req, uint64_t* answer);
 
+/*This function:
+1. takes a client fd(filedescription) and a u-integer 64 bit answer
+2. it converts it to big-endian msb convention
+2. sends untill "send" sys-call has transfered all 8 bytes 
+3. returns nothing*/
+void send_answer(int client_fd, uint64_t answer);
+
 #endif 
