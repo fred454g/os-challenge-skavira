@@ -4,10 +4,13 @@ LDFLAGS = -pthread
 
 TARGET = server
 
+SRCS = server.c src/server_helpers.c
+HDRS = include/messages.h include/server_helpers.h include/lonesha256.h
+
 all: $(TARGET)
 
-$(TARGET): server.c include/messages.h
-	$(CC) $(CFLAGS) -o $(TARGET) server.c $(LDFLAGS) $(LDLIBS)
+$(TARGET): $(SRCS) $(HDRS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS) $(LDFLAGS) $(LDLIBS)
 
 clean:
 	rm -f $(TARGET) *.o
