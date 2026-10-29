@@ -7,5 +7,6 @@
 #include <sys/types.h> 
 
 //functions here:
+int create_listening_socket(long port);
 
 #endif 

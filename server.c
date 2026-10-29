@@ -39,31 +39,9 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
         fprintf(stderr, "Invalid port...");
         exit(EXIT_FAILURE);
     }
-
-    //Create a TCP socket
-    int server_filedescriptor = socket(AF_INET, SOCK_STREAM, 0); //creates socket in convention: IPv4, stream of bytes, standardprotocol(TCP) -> So server fd listens for new connections
-    if (server_filedescriptor == -1){
-        fprintf(stderr, "Socket creation failed");
-        exit(EXIT_FAILURE);
-    }
-
-    //listen on VM's networking interfaces
-    struct sockaddr_in address = {0};
-    address.sin_family = AF_INET; //IPv4
-    address.sin_addr.s_addr = htonl(INADDR_ANY); // accept all server-vm's local IPv4 adresses -> htonl changes byteorder from machine to network
-    address.sin_port = htons((unsigned short)port); //presents port
-
-    if (bind(server_filedescriptor, (struct sockaddr *)&address, sizeof(address)) == -1){
-        perror("bind");
-        close(server_filedescriptor);
-        exit(EXIT_FAILURE);
-    }
-
-    if (listen(server_filedescriptor, 128) == -1) {
-        perror("listen");
-        close(server_filedescriptor);
-        exit(EXIT_FAILURE);
-    }
+    
+    //Create a listening TCP socket on the specified port
+    int server_filedescriptor = create_listening_socket(port);
 
     printf("Listening on port %ld\n", port);
 
