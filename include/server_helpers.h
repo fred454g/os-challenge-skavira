@@ -35,4 +35,11 @@ int create_listening_socket(long port);
 6. returns 1 if we received a full request, 0 if not*/
 bool read_request(int client_fd, struct request* req);
 
+/* This function:
+1. takes a pointer to a strcut request and a u-integer 64 bit answer pointer
+2. it takes the request and guesses on hashes between start and end in datapackage
+3. if it is a match, the guessed number is printed to the terminal
+4. returns true if a match is found, false if not*/
+bool find_answer(const struct request* req, uint64_t* answer);
+
 #endif 

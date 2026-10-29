@@ -1,5 +1,3 @@
-#define LONESHA256_IMPLEMENTATION
-#include "include/lonesha256.h"
 #include "include/messages.h"
 #include "include/server_helpers.h"
 
@@ -14,16 +12,13 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-
-
-
 /*
-Client                              Server
-   |── create TCP-forbindelse ──────────>|
-   |── Send 49 bytes (task) ──────>|
-   |                                   | Find asnwer
-   |<─ Send 8 bytes (answer) ─────────|
-   |          close connection        |
+Client                                  Server
+   |── create TCP-forbindelse ──────────>   |
+   |── Send 49 bytes (task) ──────>         |
+   |                                        | Find asnwer
+   |<─ Send 8 bytes (answer) ─────────      |
+   |          close connection              |
    [0-31] Sha256 what we have to reverse hash
    [32-39] minVal of guess.   [40-47]maxVal of guess.
    [48] prio least(0->16)most
@@ -69,22 +64,10 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
         struct request req;
         read_request(client_filedescriptor, &req);
 
-        int found = 0;
-        u_int64_t answer = 0;
-
-        for (uint64_t guess = req.start; guess < req.end; guess++){ //TODO: Implement better guessing algorithm
-            uint64_t little_endian_guess = htole64(guess);
-            unsigned char calculated_hash[32];
-            lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
-
-            if (memcmp(calculated_hash, req.hash, sizeof(calculated_hash)) == 0) {
-                printf("number %" PRIu64 " is correct!\n", guess);
-                found = 1;
-                answer = guess;
-                break;
-            }
-        }
-        if (found){
+        uint64_t answer = 0;
+        
+        // if find_answer returns true, a match is found and the value is returned to the client
+        if (find_answer(&req, &answer)){
             uint64_t answer_big_endian = htobe64(answer);
             size_t sent = 0;
 
@@ -110,7 +93,4 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
         }
         close(client_filedescriptor);
     }
-
 }
-
-

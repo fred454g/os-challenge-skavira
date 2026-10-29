@@ -1,5 +1,8 @@
+#define LONESHA256_IMPLEMENTATION
+
 #include "server_helpers.h"
 #include "messages.h"
+#include "lonesha256.h"
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -10,6 +13,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 
 /* This function:
 1. takes a port number
@@ -109,3 +113,22 @@ bool read_request(int client_fd, struct request* req) {
     return recieved == sizeof(buffer);
 }
 
+/* This function:
+1. takes a pointer to a strcut request and a u-integer 32 bit answer pointer
+2. it takes the request and guesses on hashes between start and end in datapackage
+3. if it is a match, the guessed number is printed to the terminal
+4. returns true if a match is found, false if not*/
+bool find_answer(const struct request* req, uint64_t* answer) {
+    for (uint64_t guess = req->start; guess < req->end; guess++){ //TODO: Implement better guessing algorithm
+        uint64_t little_endian_guess = htole64(guess);
+        unsigned char calculated_hash[32];
+        lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
+
+        if (memcmp(calculated_hash, req->hash, sizeof(calculated_hash)) == 0) {
+            printf("number %" PRIu64 " is correct!\n", guess);
+            *answer = guess;
+            return true;
+        }
+    }
+    return false;
+}
