@@ -1,16 +1,11 @@
-#include "include/messages.h"
 #include "include/server_helpers.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <arpa/inet.h>
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <inttypes.h>
 
 /*
 Client                                  Server
@@ -24,7 +19,7 @@ Client                                  Server
    [48] prio least(0->16)most
 */
 
-int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much noise
+int main(int argc, char const *argv[]){
     if(argc != 2){ //Expect argv[0] ex: "./server" to be name and argv[1] to be port ex: "5003"
         fprintf(stderr, "We didn't recieve expected package - program name: %s", argv[0]);
         exit(EXIT_FAILURE);
@@ -42,13 +37,13 @@ int main(int argc, char const *argv[]){ //TODO: Refactor TCP to helper. Too much
 
     printf("Listening on port %ld\n", port);
 
-    /*
-    wait on client ->
-    recieve 49 bytes ->
-    print ->
-    close connection ->
-    wait for next client
-    */
+    /* The loop handles one connection at a time:
+       1. accept       --> wait for a client, get client_filedescriptor for the connection
+       2. read_request --> read the 49 bytes and fill in req
+       3. find_answer  --> brute force: hash every number in [start, end) with SHA-256
+                           and compare with the request's hash; true if a match is found
+       4. if a match, send_answer sends the 8-byte answer; otherwise print "No matching..."
+       5. close the connection and wait for the next one */
     for(;;){
         int client_filedescriptor = accept(server_filedescriptor, NULL, NULL); //Waits for client
         if (client_filedescriptor == -1){

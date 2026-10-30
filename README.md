@@ -4,12 +4,12 @@ TCP server for the OS Challenge in course 02159: the client sends a SHA-256 hash
 
 ## Structure
 
-- `server.c`: `main()` reads the port, creates a socket, and runs `accept → recv → close` for one client at a time.
-- `include/server_helpers.h`: Declarations for helper functions.
-- `src/server_helpers.c`: Implementation of helper functions, e.g., for decoding requests and finding the answer. Both helper files are currently just skeletons.
+- `server.c`: `main()` reads the port, creates the listening socket and, for one connection at a time, runs `accept → read_request → find_answer → send_answer → close`.
+- `include/server_helpers.h`: `struct request` (the decoded 49-byte request) and declarations of the helper functions.
+- `src/server_helpers.c`: The helper functions `create_listening_socket`, `read_request`, `find_answer` (brute force with lonesha256) and `send_answer`.
 - `include/messages.h`: Packet sizes and offsets for byte mapping.
-- `include/lonesha256.h`: SHA-256 function; the implementation is included in `server.c`.
-- `Makefile`: Builds `server`. NOTE: Currently, it only compiles `server.c`; add `src/server_helpers.c` to both dependencies and the compiler command when helpers are needed
+- `include/lonesha256.h`: SHA-256 function; the implementation is included in `src/server_helpers.c`.
+- `Makefile`: Builds `server` from `server.c` and `src/server_helpers.c`.
 
 ## Packet Mapping
 
