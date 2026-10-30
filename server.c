@@ -21,7 +21,7 @@ Client                                  Server
 
 int main(int argc, char const *argv[]){
     if(argc != 2){ //Expect argv[0] ex: "./server" to be name and argv[1] to be port ex: "5003"
-        fprintf(stderr, "Usuage: %s <port>\n", argv[0]);
+        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
