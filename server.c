@@ -56,8 +56,12 @@ int main(int argc, char const *argv[]){
         }
 
         // Creates a request datatype, and calls read_request() to fill out request with incoming datapackage
+        // We close the connection if we get less than 49 bytes (incomplete data package)
         struct request req;
-        read_request(client_filedescriptor, &req);
+        if(!read_request(client_filedescriptor, &req)) {
+            close(client_filedescriptor);
+            continue;
+        }
 
         uint64_t answer = 0;
         
