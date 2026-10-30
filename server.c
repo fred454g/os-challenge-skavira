@@ -51,8 +51,7 @@ int main(int argc, char const *argv[]){
                 continue;
             }
             perror("accept");
-            close(client_filedescriptor);
-            exit(EXIT_FAILURE);
+            continue;
         }
 
         // Creates a request datatype, and calls read_request() to fill out request with incoming datapackage
