@@ -15,13 +15,6 @@
 #include <errno.h>
 #include <inttypes.h>
 
-/* This function:
-1. takes a port number
-2. creates a TCP socket, IPv4 with steam of bytes
-3. configures the socket to accept all server-vm's local IPv4 adresses, on the specified port
-4. binds the port to the socket
-5. begins listening on the specified port on all local IPv4 adresses
-6. returns the socket file descriptor*/
 int create_listening_socket(long port) {
 
     //Create a TCP socket
@@ -52,13 +45,6 @@ int create_listening_socket(long port) {
     return server_filedescriptor;
 }
 
-/* This function:
-1. takes a client fd(filedescription) and a pointer to a request struct
-2. Creates a buffer and fills it with the incomming request
-3. Checks for errors
-4. Prints out the received hash in the terminal
-5. Fills out the request struct with the incomming data
-6. returns 1 if we received a full request, 0 if not*/
 bool read_request(int client_fd, struct request* req) {
     unsigned char buffer[PACKET_REQUEST_SIZE];
     size_t recieved = 0;
@@ -113,11 +99,6 @@ bool read_request(int client_fd, struct request* req) {
     return recieved == sizeof(buffer);
 }
 
-/* This function:
-1. takes a pointer to a strcut request and a u-integer 64 bit answer pointer
-2. it takes the request and guesses on hashes between start and end in datapackage
-3. if it is a match, the guessed number is printed to the terminal
-4. returns true if a match is found, false if not*/
 bool find_answer(const struct request* req, uint64_t* answer) {
     for (uint64_t guess = req->start; guess < req->end; guess++){ //TODO: Implement better guessing algorithm
         uint64_t little_endian_guess = htole64(guess);
@@ -133,11 +114,6 @@ bool find_answer(const struct request* req, uint64_t* answer) {
     return false;
 }
 
-/*This function:
-1. takes a client fd(filedescription) and a u-integer 64 bit answer
-2. it converts it to big-endian msb convention
-2. sends untill "send" sys-call has transfered all 8 bytes 
-3. returns nothing*/
 void send_answer(int client_fd, uint64_t answer) {
     uint64_t answer_big_endian = htobe64(answer);
     size_t sent = 0;
