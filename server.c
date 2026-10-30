@@ -21,14 +21,14 @@ Client                                  Server
 
 int main(int argc, char const *argv[]){
     if(argc != 2){ //Expect argv[0] ex: "./server" to be name and argv[1] to be port ex: "5003"
-        fprintf(stderr, "We didn't recieve expected package - program name: %s", argv[0]);
+        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
     char *end;
     long port = strtol(argv[1], &end, 10); //converts str into long (ptr to str input, ptr that will point to end of str, number base)
     if (*argv[1] == '\0' || *end != '\0' || port < 1 || port > 65535){
-        fprintf(stderr, "Invalid port...");
+        fprintf(stderr, "Invalid port: %s (must be a number from 1 to 65535)\n", argv[1]);
         exit(EXIT_FAILURE);
     }
     
@@ -51,13 +51,16 @@ int main(int argc, char const *argv[]){
                 continue;
             }
             perror("accept");
-            close(client_filedescriptor);
-            exit(EXIT_FAILURE);
+            continue;
         }
 
         // Creates a request datatype, and calls read_request() to fill out request with incoming datapackage
+        // We close the connection if we get less than 49 bytes (incomplete data package)
         struct request req;
-        read_request(client_filedescriptor, &req);
+        if(!read_request(client_filedescriptor, &req)) {
+            close(client_filedescriptor);
+            continue;
+        }
 
         uint64_t answer = 0;
         
