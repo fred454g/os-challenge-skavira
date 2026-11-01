@@ -19,54 +19,24 @@ Client                                  Server
    [48] prio least(0->16)most
 */
 
-int main(int argc, char const *argv[]){
-    if(argc != 2){ //Expect argv[0] ex: "./server" to be name and argv[1] to be port ex: "5003"
-        fprintf(stderr, "We didn't recieve expected package - program name: %s", argv[0]);
-        exit(EXIT_FAILURE);
-    }
 
-    char *end;
-    long port = strtol(argv[1], &end, 10); //converts str into long (ptr to str input, ptr that will point to end of str, number base)
-    if (*argv[1] == '\0' || *end != '\0' || port < 1 || port > 65535){
-        fprintf(stderr, "Invalid port...");
-        exit(EXIT_FAILURE);
-    }
+/* Sequential server: one connection at a time.
+    Baseline for concurrency experiment (tag: baseline-refactor).
+    Experiment variants in experiments/concurrency/ */
+int main(int argc, char const *argv[]){
+    long port = parse_port_or_exit(argc, argv);
+    ignore_sigpipe();
     
     //Create a listening TCP socket on the specified port
     int server_filedescriptor = create_listening_socket(port);
-
     printf("Listening on port %ld\n", port);
+    fflush(stdout);
 
-    /* The loop handles one connection at a time:
-       1. accept       --> wait for a client, get client_filedescriptor for the connection
-       2. read_request --> read the 49 bytes and fill in req
-       3. find_answer  --> brute force: hash every number in [start, end) with SHA-256
-                           and compare with the request's hash; true if a match is found
-       4. if a match, send_answer sends the 8-byte answer; otherwise print "No matching..."
-       5. close the connection and wait for the next one */
     for(;;){
-        int client_filedescriptor = accept(server_filedescriptor, NULL, NULL); //Waits for client
+        int client_filedescriptor = accept_client(server_filedescriptor); //Waits for a client
         if (client_filedescriptor == -1){
-            if (errno == EINTR) { //Continue after blocking signal
-                continue;
-            }
-            perror("accept");
-            close(client_filedescriptor);
-            exit(EXIT_FAILURE);
+            continue;
         }
-
-        // Creates a request datatype, and calls read_request() to fill out request with incoming datapackage
-        struct request req;
-        read_request(client_filedescriptor, &req);
-
-        uint64_t answer = 0;
-        
-        // if find_answer returns true, a match is found and the value is returned to the client
-        if (find_answer(&req, &answer)){
-            send_answer(client_filedescriptor, answer);
-        } else {
-            fprintf(stderr, "No matching number found in the requested range\n");
-        }
-        close(client_filedescriptor);
+        handle_client(client_filedescriptor); // read, brute force, reply, close
     }
 }
