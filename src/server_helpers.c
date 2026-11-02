@@ -102,7 +102,7 @@ bool read_request(int client_fd, struct request* req) {
         );
 
         if (n == 0) {
-            fprintf(stderr, "Client disconnected. Recieved %zu of %zu bytes\n", recieved, sizeof(buffer));
+            fprintf(stderr, "Client closed the connection after %zu of %zu bytes\n", recieved, sizeof(buffer));
             return false;
         }
 
