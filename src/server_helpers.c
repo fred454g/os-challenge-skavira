@@ -20,7 +20,7 @@ int create_listening_socket(long port) {
     //Create a TCP socket
     int server_filedescriptor = socket(AF_INET, SOCK_STREAM, 0); //creates socket in convention: IPv4, stream of bytes, standardprotocol(TCP) -> So server fd listens for new connections
     if (server_filedescriptor == -1){
-        fprintf(stderr, "Socket creation failed");
+        perror("socket");
         exit(EXIT_FAILURE);
     }
 
@@ -59,8 +59,8 @@ bool read_request(int client_fd, struct request* req) {
         );
 
         if (n == 0) {
-            fprintf(stderr, "Client disconnected. All data shoul d be recieved\n");
-            break;
+            fprintf(stderr, "Client closed the connection after %zu of %zu bytes\n", recieved, sizeof(buffer));
+            return false;
         }
 
         if (n == -1) {
@@ -68,7 +68,7 @@ bool read_request(int client_fd, struct request* req) {
                 continue;
             }
             perror("recv");
-            break;
+            return false;
         }
         recieved += (size_t)n;
     }
@@ -96,7 +96,7 @@ bool read_request(int client_fd, struct request* req) {
 
     req->prio  = buffer[PACKET_REQUEST_PRIO_OFFSET];
 
-    return recieved == sizeof(buffer);
+    return true;
 }
 
 bool find_answer(const struct request* req, uint64_t* answer) {
