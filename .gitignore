@@ -27,3 +27,7 @@ desktop.ini
 
 # Lokale test-scripts og logs
 *.log
+
+# Experiment binaries (built by `make experiments`) and Python cache
+bin/
+__pycache__/

@@ -1,75 +1,109 @@
-#include "include/server_helpers.h"
+/* Final concurrency server adjustment: thread pool (N = #CPUs workers + FIFO queue).
+ * Adopted from experiments/concurrency/server_pool.c - see the concurrency
+ * experiment in the report (-84.6 % vs sequential).
+ *
+ * N worker threads are created once at startup (N = number of online CPUs,
+ * or the POOL_THREADS environment variable). The main thread accepts
+ * connections and puts their fds in a shared FIFO queue; idle workers take
+ * fds from the queue and run handle_client().
+ * At most N requests are computed at the same time; the rest wait in the queue.
+ */
+#include "server_helpers.h"
 
+#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <errno.h>
-#include <sys/socket.h>
+#include <string.h>
 #include <unistd.h>
 
-/*
-Client                                  Server
-   |── create TCP-forbindelse ──────────>   |
-   |── Send 49 bytes (task) ──────>         |
-   |                                        | Find asnwer
-   |<─ Send 8 bytes (answer) ─────────      |
-   |          close connection              |
-   [0-31] Sha256 what we have to reverse hash
-   [32-39] minVal of guess.   [40-47]maxVal of guess.
-   [48] prio least(0->16)most
-*/
+#define QUEUE_CAPACITY 4096 // if full, accept() pauses; the kernel backlog holds further clients
 
-int main(int argc, char const *argv[]){
-    if(argc != 2){ //Expect argv[0] ex: "./server" to be name and argv[1] to be port ex: "5003"
-        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
-        exit(EXIT_FAILURE);
+/* Bounded FIFO queue of client fds (ring buffer), protected by one mutex.
+   not_empty: signalled when a fd is added   -> wakes a waiting worker
+   not_full:  signalled when a fd is removed -> wakes the main thread if it waits */
+static int queue[QUEUE_CAPACITY];
+static size_t queue_head = 0;  // index of the oldest element
+static size_t queue_count = 0; // number of elements in the queue
+static pthread_mutex_t queue_lock = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t queue_not_empty = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t queue_not_full = PTHREAD_COND_INITIALIZER;
+
+static void queue_push(int client_fd) {
+    pthread_mutex_lock(&queue_lock);
+    while (queue_count == QUEUE_CAPACITY) {  // while, not if: guards against spurious wake-ups
+        pthread_cond_wait(&queue_not_full, &queue_lock);
     }
+    queue[(queue_head + queue_count) % QUEUE_CAPACITY] = client_fd;
+    queue_count++;
+    pthread_cond_signal(&queue_not_empty);   // one new item -> wake one worker
+    pthread_mutex_unlock(&queue_lock);
+}
 
-    char *end;
-    long port = strtol(argv[1], &end, 10); //converts str into long (ptr to str input, ptr that will point to end of str, number base)
-    if (*argv[1] == '\0' || *end != '\0' || port < 1 || port > 65535){
-        fprintf(stderr, "Invalid port: %s (must be a number from 1 to 65535)\n", argv[1]);
-        exit(EXIT_FAILURE);
+static int queue_pop(void) {
+    pthread_mutex_lock(&queue_lock);
+    while (queue_count == 0) {
+        pthread_cond_wait(&queue_not_empty, &queue_lock); // releases the lock while sleeping
     }
-    
-    //Create a listening TCP socket on the specified port
-    int server_filedescriptor = create_listening_socket(port);
+    int client_fd = queue[queue_head];
+    queue_head = (queue_head + 1) % QUEUE_CAPACITY;
+    queue_count--;
+    pthread_cond_signal(&queue_not_full);
+    pthread_mutex_unlock(&queue_lock);
+    return client_fd;
+}
 
-    printf("Listening on port %ld\n", port);
+static void *worker(void *arg) {
+    (void)arg;
+    for (;;) {
+        int client_fd = queue_pop(); // sleeps until there is work
+        handle_client(client_fd);
+    }
+    return NULL;
+}
 
-    /* The loop handles one connection at a time:
-       1. accept       --> wait for a client, get client_filedescriptor for the connection
-       2. read_request --> read the 49 bytes and fill in req
-       3. find_answer  --> brute force: hash every number in [start, end) with SHA-256
-                           and compare with the request's hash; true if a match is found
-       4. if a match, send_answer sends the 8-byte answer; otherwise print "No matching..."
-       5. close the connection and wait for the next one */
-    for(;;){
-        int client_filedescriptor = accept(server_filedescriptor, NULL, NULL); //Waits for client
-        if (client_filedescriptor == -1){
-            if (errno == EINTR) { //Continue after blocking signal
-                continue;
+// Pool size: POOL_THREADS environment variable if set (for experiments), otherwise #CPUs
+static long pool_size(void) {
+    const char *env = getenv("POOL_THREADS");
+    if (env != NULL) {
+        long n = strtol(env, NULL, 10);
+        if (n >= 1 && n <= 1024) {
+            return n;
+        }
+        fprintf(stderr, "Ignoring invalid POOL_THREADS=%s\n", env);
+    }
+    long cpus = sysconf(_SC_NPROCESSORS_ONLN);
+    return cpus >= 1 ? cpus : 1;
+}
+
+int main(int argc, char const *argv[]) {
+    long port = parse_port_or_exit(argc, argv);
+    ignore_sigpipe();
+
+    int server_fd = create_listening_socket(port);
+
+    long n_workers = pool_size();
+    for (long i = 0; i < n_workers; i++) {
+        pthread_t tid;
+        int rc = pthread_create(&tid, NULL, worker, NULL);
+        if (rc != 0) {
+            fprintf(stderr, "pthread_create: %s\n", strerror(rc));
+            if (i == 0) {
+                exit(EXIT_FAILURE); // no workers at all: nothing would ever be answered
             }
-            perror("accept");
+            n_workers = i;          // run with the workers we did get
+            break;
+        }
+        pthread_detach(tid);
+    }
+
+    printf("Listening on port %ld (thread pool, %ld workers)\n", port, n_workers);
+    fflush(stdout);
+
+    for (;;) {
+        int client_fd = accept_client(server_fd);
+        if (client_fd == -1) {
             continue;
         }
-
-        // Creates a request datatype, and calls read_request() to fill out request with incoming datapackage
-        // We close the connection if we get less than 49 bytes (incomplete data package)
-        struct request req;
-        if(!read_request(client_filedescriptor, &req)) {
-            close(client_filedescriptor);
-            continue;
-        }
-
-        uint64_t answer = 0;
-        
-        // if find_answer returns true, a match is found and the value is returned to the client
-        if (find_answer(&req, &answer)){
-            send_answer(client_filedescriptor, answer);
-        } else {
-            fprintf(stderr, "No matching number found in the requested range\n");
-        }
-        close(client_filedescriptor);
+        queue_push(client_fd);
     }
 }

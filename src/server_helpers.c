@@ -8,12 +8,34 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
 #include <inttypes.h>
+
+long parse_port_or_exit(int argc, char const *argv[]) {
+    if (argc != 2) { // argv[0] is the program name, argv[1] is the port.
+        fprintf(stderr, "Usage: %s <port>\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+
+    char *end;
+    long port = strtol(argv[1], &end, 10); //converts str into long (ptr to str input, ptr that will point to end of str, number base)
+    if (*argv[1] == '\0' || *end != '\0' || port < 1 || port > 65535){
+        fprintf(stderr, "Invalid port: %s (must be a number from 1 to 65535)\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+    return port;
+}
+
+void ignore_sigpipe(void) {
+    // Writing to a socket the client has closed raises SIGPIPE, whose default
+    // action terminates the process. Ignored, send() just returns -1 (EPIPE).
+    signal(SIGPIPE, SIG_IGN);
+}
 
 int create_listening_socket(long port) {
 
@@ -22,6 +44,12 @@ int create_listening_socket(long port) {
     if (server_filedescriptor == -1){
         perror("socket");
         exit(EXIT_FAILURE);
+    }
+
+    // Allow rebinding the port right after restart, otherwise bind fails with "Address already in use"
+    int yes = 1;
+    if (setsockopt(server_filedescriptor, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+        perror("setsockopt(SO_REUSEADDR)");
     }
 
     //listen on VM's networking interfaces
@@ -36,13 +64,28 @@ int create_listening_socket(long port) {
         exit(EXIT_FAILURE);
     }
 
-    if (listen(server_filedescriptor, 128) == -1) {
+    // SOMAXCONN is the system maximum queue size
+    if (listen(server_filedescriptor, SOMAXCONN) == -1) {
         perror("listen");
         close(server_filedescriptor);
         exit(EXIT_FAILURE);
     }
 
     return server_filedescriptor;
+}
+
+int accept_client(int server_fd) {
+    for (;;) {
+        int client_fd = accept(server_fd, NULL, NULL); // blocks untill client connects
+        if (client_fd >= 0) {
+            return client_fd;
+        }
+        if (errno == EINTR || errno == ECONNABORTED) {
+            continue; // interrupted by signal
+        }
+        perror("accept");
+        return -1;
+    }
 }
 
 bool read_request(int client_fd, struct request* req) {
@@ -73,15 +116,14 @@ bool read_request(int client_fd, struct request* req) {
         recieved += (size_t)n;
     }
 
-    if (recieved == sizeof(buffer)) {
-        printf("Recieved %zu bytes:\n", recieved);
-
-        for (size_t i = 0; i < recieved; i++) {
-            printf("%02x ", (unsigned int)buffer[i]);
-        }
-        printf("\n");
-        fflush(stdout);
+#ifdef DEBUG
+    printf("Recieved %zu bytes:\n", recieved);
+    for (size_t i = 0; i < recieved; i++) {
+        printf("%02x ", (unsigned int)buffer[i]);
     }
+    printf("\n");
+    fflush(stdout);
+#endif
 
     memcpy(req->hash, buffer + PACKET_REQUEST_HASH_OFFSET, sizeof(req->hash));
 
@@ -102,7 +144,7 @@ bool read_request(int client_fd, struct request* req) {
 bool find_answer(const struct request* req, uint64_t* answer) {
     for (uint64_t guess = req->start; guess < req->end; guess++){ //TODO: Implement better guessing algorithm
         uint64_t little_endian_guess = htole64(guess);
-        unsigned char calculated_hash[32];
+        unsigned char calculated_hash[SHA256_DIGEST_LENGTH];
         lonesha256(calculated_hash, (const unsigned char *)&little_endian_guess, sizeof(little_endian_guess));
 
         if (memcmp(calculated_hash, req->hash, sizeof(calculated_hash)) == 0) {
@@ -127,12 +169,34 @@ void send_answer(int client_fd, uint64_t answer) {
                 continue;
             }
             perror("send");
-            break;
+            return;
         }
 
         if (n == 0) {
-            break;
+            return;
         }
         sent += (size_t)n;
     }
+}
+
+void handle_client(int client_fd) {
+    struct request req;
+
+    // Incomplete request: dropped
+    if (!read_request(client_fd, &req)) {
+        close(client_fd);
+        return;
+    }
+
+    uint64_t answer = 0;
+
+    // CACHE EXPERIMENT (NIKOLAI): look up req.hash, so hits make us skip the search.
+
+    if (find_answer(&req, &answer)) {
+        // CACHE EXPERIMENT (NIKOLAI): store req.hash for future lookup.
+        send_answer(client_fd, answer);
+    } else {
+        fprintf(stderr, "No matching number found in [%" PRIu64 ", %" PRIu64 ")\n", req.start, req.end);
+    }
+    close(client_fd);
 }
