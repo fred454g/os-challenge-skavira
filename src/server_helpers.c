@@ -25,7 +25,7 @@ long parse_port_or_exit(int argc, char const *argv[]) {
     char *end;
     long port = strtol(argv[1], &end, 10); //converts str into long (ptr to str input, ptr that will point to end of str, number base)
     if (*argv[1] == '\0' || *end != '\0' || port < 1 || port > 65535){
-        fprintf(stderr, "Invalid port: %s\n", argv[1]);
+        fprintf(stderr, "Invalid port: %s (must be a number from 1 to 65535)\n", argv[1]);
         exit(EXIT_FAILURE);
     }
     return port;
