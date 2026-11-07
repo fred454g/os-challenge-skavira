@@ -1,0 +1,2 @@
+variant,total,delay,runs,unfinished,min_reliability,median_score,min_score,max_score
+fifo,500,600000,1,0,100.0,398041406,398041406,398041406

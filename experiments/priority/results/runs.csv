@@ -1,0 +1,2 @@
+exp,variant,run,seed,total,delay,lambda,rep,difficulty,reliability,score,commit,date,file
+priority,fifo,1,5041,500,600000,1.5,20,30000000,100.0,398041406,262400d,2026-11-07T09:59:59+00:00,fifo_t500_d600000_s5041_r1.txt
