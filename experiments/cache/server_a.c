@@ -1,5 +1,7 @@
-/* Description of variant A cache...
- */
+/* CACHE IMPLEMENTATION - VARIATION (A):
+Version of server that implements a cache-lookup when a worker begins working on the request from the que.
+
+Dispatcher takes request --> puts in que --> worker takes request --> cash-lookup #1 */
 #include "server_helpers.h"
 #include "cache.h"
 
