@@ -20,13 +20,17 @@ struct cache_element {
 static struct cache_element cache[CACHE_CAPACITY];              // The cache with 2048 40 bytes elements (80 KB)
 static size_t counter = 0;                                      // Counts how many cache_element slots have been used already
 static pthread_mutex_t cache_lock = PTHREAD_MUTEX_INITIALIZER;  // The lock for the mutex on the cache
+static size_t hit_counter = 0;                                  // Counter for counting cache-hits 4 flexing on yall bitches! yaheard!
 
 bool cache_lookup(const unsigned char* hash_to_find, uint64_t* answer) {
     pthread_mutex_lock(&cache_lock);
     for (size_t i = 0; i < counter; i++) {
         if (memcmp(hash_to_find, cache[i].hash, SHA256_DIGEST_LENGTH) == 0) {
             *answer = cache[i].answer;
+            hit_counter++;
+            size_t hit_counter_forprint = hit_counter;
             pthread_mutex_unlock(&cache_lock);
+            fprintf(stderr, "cache hits: %zu \n", hit_counter_forprint);
             return true;
         }
     }
