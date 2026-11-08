@@ -1,20 +1,14 @@
-/* Final concurrency server adjustment: thread pool (N = #CPUs workers + FIFO queue).
- * Adopted from experiments/concurrency/server_pool.c - see the concurrency
- * experiment in the report (-84.6 % vs sequential).
- *
- * N worker threads are created once at startup (N = number of online CPUs,
- * or the POOL_THREADS environment variable). The main thread accepts
- * connections and puts their fds in a shared FIFO queue; idle workers take
- * fds from the queue and run handle_client().
- * At most N requests are computed at the same time; the rest wait in the queue.
+/* Description of variant A cache...
  */
 #include "server_helpers.h"
+#include "cache.h"
 
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #define QUEUE_CAPACITY 4096 // if full, accept() pauses; the kernel backlog holds further clients
 
@@ -52,11 +46,39 @@ static int queue_pop(void) {
     return client_fd;
 }
 
-static void *worker(void *arg) {
+/*Variant of handle_client, that implements a cache-lookup before bruteforce (VARIANT A)*/
+static void handle_client_a(int client_fd) {
+    struct request req;
+
+    // Incomplete request: dropped
+    if (!read_request(client_fd, &req)) {
+        close(client_fd);
+        return;
+    }
+
+    uint64_t answer = 0;
+
+    // Look up req.hash in cache, so hits make us skip the search.
+    if (cache_lookup(req.hash, &answer)) {
+        send_answer(client_fd, answer); // Cache hit!
+        close(client_fd);
+        return;
+    }
+
+    if (find_answer(&req, &answer)) {
+        cache_insert(req.hash, answer); // Store req.hash for future lookup.
+        send_answer(client_fd, answer);
+    } else {
+        fprintf(stderr, "No matching number found in [%" PRIu64 ", %" PRIu64 ")\n", req.start, req.end);
+    }
+    close(client_fd);
+}
+
+static void* worker(void *arg) {
     (void)arg;
     for (;;) {
         int client_fd = queue_pop(); // sleeps until there is work
-        handle_client(client_fd);
+        handle_client_a(client_fd);
     }
     return NULL;
 }
