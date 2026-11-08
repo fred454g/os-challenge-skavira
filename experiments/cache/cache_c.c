@@ -1,3 +1,5 @@
+/* The cache for variant C and the API that enables a program to make use of it.
+Each cache element has a done flag and a waiting list, so repeats can wait on an OG that is still being processed*/
 #include "messages.h"
 #include "cache_c.h"
 

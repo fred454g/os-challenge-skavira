@@ -20,7 +20,7 @@ struct cache_element {
 static struct cache_element cache[CACHE_CAPACITY];              // The cache with 2048 40 bytes elements (80 KB)
 static size_t counter = 0;                                      // Counts how many cache_element slots have been used already
 static pthread_mutex_t cache_lock = PTHREAD_MUTEX_INITIALIZER;  // The lock for the mutex on the cache
-static size_t hit_counter = 0;                                  // Counter for counting cache-hits 4 flexing on yall bitches! yaheard!
+static size_t hit_counter = 0;                                  // Counter for counting cache-hits
 
 bool cache_lookup(const unsigned char* hash_to_find, uint64_t* answer) {
     pthread_mutex_lock(&cache_lock);

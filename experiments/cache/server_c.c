@@ -66,7 +66,7 @@ static void handle_client_c(struct que_request req_to_handle) {
     if (find_answer(&req_to_handle.req, &answer)) {
         int waiting_fds[MAX_WAITERS];
         size_t waiting_count = 0;
-        cache_c_complete(req_to_handle.req.hash, answer, waiting_fds, &waiting_count); // Store req.hash for future lookup.
+        cache_c_complete(req_to_handle.req.hash, answer, waiting_fds, &waiting_count); // Mark cache element as done + take the waiting fd's
         send_answer(req_to_handle.client_fd, answer); // send answer to OG client
         for (size_t i = 0; i < waiting_count; i++) {
             send_answer(waiting_fds[i], answer); // send answers to waiting fd's
@@ -137,7 +137,7 @@ int main(int argc, char const *argv[]) {
             continue;
         }
         
-        // if cash hit, fill answer=answer & send answer to client instantly
+        // Cache lookup --> HIT: answer instantly | WAITING: fd is put on the OG's waiting list, worker answers later | MISS: put in que
         uint64_t answer = 0; 
         enum cache_c_result result = cache_c_lookup_or_wait(req_to_que.req.hash, req_to_que.client_fd, &answer);
         if (result == CACHE_C_HIT) {
