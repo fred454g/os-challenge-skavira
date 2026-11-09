@@ -1,4 +1,0 @@
-variant,runs,min_reliability,median_score,min_score,max_score,median_elapsed_seconds
-fifo,3,100,442788045,411240110,507240853,1027.07
-priorityQueue,3,100,348118018,333676812,500747140,1009.09
-priorityChunked,3,100,358528475,343603884,389425824,1025.15

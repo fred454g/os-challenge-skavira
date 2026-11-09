@@ -1,4 +1,0 @@
-variant,runs,min_reliability,median_score,min_score,max_score,median_elapsed_seconds
-baseline_v2,3,100,256787689,230796837,266143509,755.36
-priorityQueue_cache_v2,3,100,213473810,197825024,223626009,758.96
-priorityChunked_cache_v2,3,100,215460837,196445623,225565893,754.97

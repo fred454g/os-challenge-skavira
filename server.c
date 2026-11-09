@@ -1,12 +1,28 @@
-/* CACHE IMPLEMENTATION - VARIATION (C):
-Version of server that implements a cache-lookup when the dispatcher picks up a client request,
-and then if it --> GETS A HIT & ? 
-                     A) THE OG IS DONE --> Answer immediatly
-                     B) THE OS IS NOT DONE --> Put fd of req on as waiter of cache_elemnt, so worker can answer later
-                
-               --> GETS A MISS --> Creates new cache entry, with tag "not done"
-
-When a OG req is done processing --> Cache entry is updated to done, answer is copied to cache entry --> OG req + waiting fd's are answered.*/
+/* TCP hash-search server: thread pool + cache variation C + priority queue.
+ *
+ * Startup creates one worker per online CPU, unless POOL_THREADS overrides it.
+ * The main thread acts as dispatcher: it accepts connections, reads each
+ * request's hash, search interval and priority, then checks the shared cache.
+ *
+ * The cache determines what happens to each request:
+ * - Completed entry: the dispatcher sends the cached answer and closes the fd.
+ * - Unfinished entry with room for a waiter: the fd is added to that entry's
+ *   waiting list. The worker solving the original request answers it later.
+ * - Cache miss: a new entry is marked unfinished and the request is queued.
+ *   A full cache or waiting list also sends the request to the queue, so the
+ *   cache can fall back to computing a request independently.
+ *
+ * Workers take the highest-priority queued request (16 highest, 1 lowest)
+ * and search its interval using the provided SHA-256 implementation. Requests
+ * with equal priority keep FIFO order; an ongoing search is not interrupted.
+ * When an answer is found, the worker stores it in any unfinished cache entry
+ * and marks that entry complete. It sends the answer to the original fd and
+ * any waiters taken from the entry, then closes those connections.
+ *
+ * The queue and cache each have their own mutex. Workers sleep when the queue
+ * is empty, and the dispatcher waits if it is full. The brute-force search
+ * runs outside both locks, allowing other workers and the dispatcher to run.
+ */
 #include "server_helpers.h"
 #include "cache_c.h"
 
@@ -25,11 +41,18 @@ struct que_request {
     int client_fd;          // the client fd
 };
 
-/* Bounded FIFO queue of que_request (ring buffer), protected by one mutex.
-   not_empty: signalled when a fd is added   -> wakes a waiting worker
-   not_full:  signalled when a fd is removed -> wakes the main thread if it waits */
+/* Bounded array of requests, sorted by descending priority under queue_lock.
+ * queue[0] is the next request for a worker. Insertion moves lower-priority
+ * requests back, leaving existing equal-priority requests ahead of the new one.
+ * Removal takes queue[0] and shifts the remaining requests one position forward.
+ *
+ * queue_not_empty: signalled after insertion to wake a waiting worker.
+ * queue_not_full: signalled after removal to wake a waiting dispatcher.
+ *
+ * shortcut: insertion/removal can move O(n) requests for a queue of size n;
+ * use one FIFO queue per priority if these moves become a measured bottleneck.
+ */
 static struct que_request queue[QUEUE_CAPACITY];
-static size_t queue_head = 0;  // index of the oldest element
 static size_t queue_count = 0; // number of elements in the queue
 static pthread_mutex_t queue_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t queue_not_empty = PTHREAD_COND_INITIALIZER;
@@ -40,7 +63,13 @@ static void queue_push(struct que_request req_to_que) {
     while (queue_count == QUEUE_CAPACITY) {  // while, not if: guards against spurious wake-ups
         pthread_cond_wait(&queue_not_full, &queue_lock);
     }
-    queue[(queue_head + queue_count) % QUEUE_CAPACITY] = req_to_que;
+    size_t position = queue_count;
+    /* Move only lower priorities, so existing equal-priority jobs stay first. */
+    while (position > 0 && queue[position - 1].req.prio < req_to_que.req.prio) {
+        queue[position] = queue[position - 1];
+        position--;
+    }
+    queue[position] = req_to_que;
     queue_count++;
     pthread_cond_signal(&queue_not_empty);   // one new item -> wake one worker
     pthread_mutex_unlock(&queue_lock);
@@ -51,9 +80,9 @@ static struct que_request queue_pop(void) {
     while (queue_count == 0) {
         pthread_cond_wait(&queue_not_empty, &queue_lock); // releases the lock while sleeping
     }
-    struct que_request popped_req = queue[queue_head];
-    queue_head = (queue_head + 1) % QUEUE_CAPACITY;
+    struct que_request popped_req = queue[0];
     queue_count--;
+    memmove(queue, queue + 1, queue_count * sizeof(queue[0]));
     pthread_cond_signal(&queue_not_full);
     pthread_mutex_unlock(&queue_lock);
     return popped_req;
@@ -122,7 +151,7 @@ int main(int argc, char const *argv[]) {
         pthread_detach(tid);
     }
 
-    printf("Listening on port %ld (thread pool, %ld workers)\n", port, n_workers);
+    printf("Listening on port %ld (priority queue + cache, %ld workers)\n", port, n_workers);
     fflush(stdout);
 
     // Dispatcher: (C) Reads the request and makes cache-lookup before queing

@@ -1,9 +1,0 @@
-variant,total,delay,runs,unfinished,min_reliability,median_score,min_score,max_score
-baseline_v2,500,600000,3,0,100.0,256787689,230796837,266143509
-fifo,500,600000,4,0,100.0,427014077,398041406,507240853
-priorityChunked,500,600000,4,0,100.0,351066179,310831599,389425824
-priorityChunked_cache_v2,500,600000,3,0,100.0,215460837,196445623,225565893
-priorityQueue,500,600000,4,0,100.0,340897415,324141811,500747140
-priorityQueue_cache_v2,500,600000,3,0,100.0,213473810,197825024,223626009
-
-Wrote /Users/frederikholm/Developer/os-challenge-skavira/experiments/priority/results/runs.csv and /Users/frederikholm/Developer/os-challenge-skavira/experiments/priority/results/summary.csv
