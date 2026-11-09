@@ -4,9 +4,10 @@ TCP server for the OS Challenge in course 02159: the client sends a SHA-256 hash
 
 ## Structure
 
-- `server.c`: The submitted server - a **thread pool**: `main()` starts one worker thread per CPU, then accepts connections and puts them in a FIFO queue; each worker takes a connection and runs `handle_client()`. Adopted from the concurrency experiment (see [Experiments](#experiments)).
+- `server.c`: The submitted server - a **thread pool with a cache for repeated requests**: `main()` starts one worker thread per CPU, then accepts connections, reads each request and looks its hash up in the cache (`cache_c_lookup_or_wait()`). A hit is answered at once, a repeat of a request that is still being computed waits for it, and every other request goes into a FIFO queue. Each worker takes a request, brute-forces it in `handle_client_c()` and answers it together with any repeats waiting for it. The thread pool comes from the concurrency experiment and the cache from the cache experiment (variant C), see [Experiments](#experiments).
 - `include/server_helpers.h`: `struct request` (the decoded 49-byte request) and declarations of the shared helper functions.
 - `src/server_helpers.c`: The shared helpers used by the server and every experiment variant: `parse_port_or_exit`, `ignore_sigpipe`, `create_listening_socket`, `accept_client`, `read_request`, `find_answer` (brute force with lonesha256), `send_answer` and `handle_client` (one complete request: read → search → reply → close).
+- `include/cache_c.h`, `src/cache_c.c`: The cache used by `server.c`: an array of entries (hash, answer, done flag, and a waiting list of up to 16 client fds), protected by one mutex. Copied from `experiments/cache/` (variant C).
 - `include/messages.h`: Packet sizes and offsets for byte mapping.
 - `include/lonesha256.h`: SHA-256 function; the implementation is included in `src/server_helpers.c`.
 - `Makefile`: `make` builds `server` (what the graders run). `make experiments` builds the experiment variants into `bin/` - see [Experiments](#experiments).
@@ -242,7 +243,7 @@ experiments/
         └── summary.csv          median/min/max per variant and setting (generated)
 ```
 
-All variants call the same `handle_client()` from `src/server_helpers.c`, so within an experiment only the part under test differs.
+Within an experiment only the part under test differs. The concurrency variants all call the same `handle_client()` from `src/server_helpers.c`. The cache variants each have their own `handle_client_<variant>()`, because where the cache lookup happens is what the cache experiment tests.
 
 ## Baselines, branches and tags
 
@@ -253,6 +254,8 @@ Experiments build on each other: once an experiment's winner is adopted into `se
 | `baseline-refactor` | Sequential server at the milestone (milestone test: 100 %, score 296 695 793) | B0: reference for the concurrency experiment |
 | `exp-concurrency-measured` | Shared helpers + the three concurrency variants, exactly as measured | Reproduces every result in `experiments/concurrency/results/` |
 | `baseline-v1` | Thread pool adopted into `server.c` | B1: reference for the cache experiment |
+| `exp-cache-measured` | The three cache variants and `baseline-v1`'s `server.c`, exactly as measured | Reproduces every result in `experiments/cache/results/` |
+| `baseline-v2` | Thread pool + cache (variant C) adopted into `server.c` (milestone test: 100 %, score 49 891 887) | B2: reference for the priority experiment |
 
 ## Building
 
@@ -352,9 +355,35 @@ Run-to-run variation was about 2 %, so `thread` and `fork` cannot be told apart.
 
 **Conclusion:** The thread pool is adopted as the server (`server.c`). It also provides the shared memory a cache needs and the queue that priority scheduling needs.
 
-### Cache (#?) - Nikolai Kurt Skarum (s245999)
+### Cache for repeated requests (#6) - Nikolai Kurt Skarum (s245999)
 
-Planned: reuse answers for repeated hashes. Compared against `baseline-v1` (the thread pool). Details will be added when the experiment is measured.
+**Question:** Does a cache for repeated requests lower the score, and does it matter where the server looks a request up: in the worker, in both the dispatcher and the worker, or in the dispatcher with repeats waiting for an original that is not finished yet?
+
+| Variant | Source | Mechanism |
+| --- | --- | --- |
+| `baseline` | `server.c` at `exp-cache-measured` (= `baseline-v1`) | Thread pool, no cache |
+| `a` | `experiments/cache/server_a.c` + `cache.c` | The worker looks the hash up before the brute force and stores the answer after it |
+| `b` | `experiments/cache/server_b.c` + `cache.c` | The dispatcher looks the hash up before queueing (a hit is answered at once); the worker looks it up again before the brute force |
+| `c` | `experiments/cache/server_c.c` + `cache_c.c` | The dispatcher looks the hash up and stores new hashes as unfinished. A repeat of an unfinished hash waits on that entry (up to 16 per entry) and is answered when the original is done, so no hash is brute-forced twice |
+
+All caches are an array of 2048 entries, searched linearly and protected by one mutex that is never held during a brute force. Nothing is evicted, since a run has at most 500 requests.
+
+**Setup:** Final client configuration, seeds 1-3 plus seed 1 once more (4 runs per variant), measured at commit `e18fdd1` (tag `exp-cache-measured`). For each seed the variants ran in turn (baseline, A, B, C), and the server was restarted before every run so the cache started empty. Measured on a different machine than the concurrency experiment: a single request takes about 6.6-7.0 s here (pilot: 10 requests, 15 s apart) against 4.83 s there, so the scores of the two experiments cannot be compared.
+
+**Result (final configuration, median of 4 runs, all runs 100 % reliable):**
+
+| Variant | Median score | vs baseline |
+| --- | --- | --- |
+| baseline | 432 646 683 | - |
+| a | 313 947 749 | -27.4 % |
+| b | 283 704 907 | -34.4 % |
+| **c** | **261 361 198** | **-39.6 %** |
+
+The order was the same in all four runs: C before B before A before baseline. Within each run, C was 5-8 % better than B, and B 9-11 % better than A. The second seed-1 run was 4-12 % slower than the first, probably because the machine drifted during the night, but running the variants in turn kept that from changing the order.
+
+The server logs (`experiments/cache/results/server_logs/`) show where C's lead comes from. In the first seed-1 run, A and B answered 97 repeats from the cache and brute-forced 403 requests. C answered 36 repeats at once, let 62 wait for their original, and brute-forced 402. So C saves only one or two brute forces per run; its lead over B comes from repeats that no longer wait in the queue. The waiting list was never full in any run.
+
+**Conclusion:** Variant C is adopted as the server (`server.c` with `src/cache_c.c` and `include/cache_c.h`, tag `baseline-v2`).
 
 ### Priority scheduling (#8) - Freddy??
 

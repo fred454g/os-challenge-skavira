@@ -37,6 +37,9 @@ endif
 
 TARGET = server
 COMMON_SRCS = src/server_helpers.c
+# Cache used by server.c (variant C of the cache experiment). Not in COMMON_SRCS:
+# experiments/cache/ links its own copy, and two copies would clash.
+SERVER_SRCS = src/cache_c.c
 HDRS = $(wildcard include/*.h)
 
 EXP_ROOT = experiments
@@ -53,14 +56,14 @@ EXP ?= $(ALL_EXPS)
 # ---------------------------
 all: $(TARGET)
 
-$(TARGET): server.c $(COMMON_SRCS) $(HDRS)
-	$(CC) $(CFLAGS) -o $@ server.c $(COMMON_SRCS) $(LDFLAGS) $(LDLIBS)
+$(TARGET): server.c $(SERVER_SRCS) $(COMMON_SRCS) $(HDRS)
+	$(CC) $(CFLAGS) -o $@ server.c $(SERVER_SRCS) $(COMMON_SRCS) $(LDFLAGS) $(LDLIBS)
 
 baseline: $(BIN_DIR)/server-baseline
 
-$(BIN_DIR)/server-baseline: server.c $(COMMON_SRCS) $(HDRS)
+$(BIN_DIR)/server-baseline: server.c $(SERVER_SRCS) $(COMMON_SRCS) $(HDRS)
 	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ server.c $(COMMON_SRCS) $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ server.c $(SERVER_SRCS) $(COMMON_SRCS) $(LDFLAGS) $(LDLIBS)
 
 # ----------------------------
 # Experiments
