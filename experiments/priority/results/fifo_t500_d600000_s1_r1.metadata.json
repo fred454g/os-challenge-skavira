@@ -1,0 +1,25 @@
+{
+  "variant": "fifo",
+  "seed": 1,
+  "run": 1,
+  "settings": {
+    "TOTAL": 500,
+    "START": 0,
+    "DIFFICULTY": 30000000,
+    "REP_PROB_PERCENT": 20,
+    "DELAY_US": 600000,
+    "PRIO_LAMBDA": 1.5
+  },
+  "reliability_percent": 100,
+  "score": 411240110,
+  "response_count": 500,
+  "elapsed_seconds": 928.97,
+  "workers": 2,
+  "server_online_cpus": 2,
+  "source_archive": "/Users/frederikholm/Developer/os-challenge-skavira/experiments/priority/results/batch-20261107-134247Z/sources.tar.gz",
+  "source_archive_sha256": "8262ca13486c4bcd17d400b69270cc3ac6581a1d540f39b865593ea26b77b8ee",
+  "server_binary_sha256": "62dc2a66c696dd8132ba4f28f516d3610d234b7ffd97633d9b0a64d804dd02e3",
+  "client_binary_sha256": "d90299b502595a75a7ea5b969a16a21edc30d0bfb4400241334225bec0cce7fd",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "note": "Actual build inputs are archived; the raw Git header may describe a later working tree."
+}

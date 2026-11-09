@@ -1,0 +1,4 @@
+seed,fifo_score,priorityQueue_score,priorityChunked_score,priorityQueue_improvement_percent,priorityChunked_improvement_percent,chunked_vs_queue_improvement_percent
+1,411240110,333676812,343603884,18.86083,16.446894,-2.975056
+2,507240853,500747140,389425824,1.280203,23.226644,22.231044
+3,442788045,348118018,358528475,21.380439,19.029324,-2.990496

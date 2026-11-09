@@ -1,0 +1,65 @@
+[
+  {
+    "number": 1,
+    "variant": "fifo",
+    "seed": 1,
+    "run": 1,
+    "binary": "bin/server-baseline"
+  },
+  {
+    "number": 2,
+    "variant": "priorityQueue",
+    "seed": 1,
+    "run": 1,
+    "binary": "bin/priority/server-priorityQueue"
+  },
+  {
+    "number": 3,
+    "variant": "priorityChunked",
+    "seed": 1,
+    "run": 1,
+    "binary": "bin/priority/server-priorityChunked"
+  },
+  {
+    "number": 4,
+    "variant": "priorityQueue",
+    "seed": 2,
+    "run": 1,
+    "binary": "bin/priority/server-priorityQueue"
+  },
+  {
+    "number": 5,
+    "variant": "priorityChunked",
+    "seed": 2,
+    "run": 1,
+    "binary": "bin/priority/server-priorityChunked"
+  },
+  {
+    "number": 6,
+    "variant": "fifo",
+    "seed": 2,
+    "run": 1,
+    "binary": "bin/server-baseline"
+  },
+  {
+    "number": 7,
+    "variant": "priorityChunked",
+    "seed": 3,
+    "run": 1,
+    "binary": "bin/priority/server-priorityChunked"
+  },
+  {
+    "number": 8,
+    "variant": "fifo",
+    "seed": 3,
+    "run": 1,
+    "binary": "bin/server-baseline"
+  },
+  {
+    "number": 9,
+    "variant": "priorityQueue",
+    "seed": 3,
+    "run": 1,
+    "binary": "bin/priority/server-priorityQueue"
+  }
+]
