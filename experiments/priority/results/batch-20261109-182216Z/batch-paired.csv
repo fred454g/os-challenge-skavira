@@ -1,0 +1,4 @@
+seed,baseline_v2_score,priorityQueue_cache_v2_score,priorityChunked_cache_v2_score,priorityQueue_improvement_percent,priorityChunked_improvement_percent,chunked_vs_queue_improvement_percent
+1,256787689,223626009,225565893,12.914046,12.158603,-0.867468
+2,266143509,213473810,215460837,19.789962,19.043362,-0.930806
+3,230796837,197825024,196445623,14.286077,14.883746,0.697283

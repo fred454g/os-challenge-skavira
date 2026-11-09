@@ -1,0 +1,5 @@
+make: Entering directory '/tmp/os-priority-batch.nnmjun'
+cc -Wall -Wextra -O3 -pthread -Iinclude -o bin/server-baseline server.c src/cache_c.c src/server_helpers.c -pthread 
+cc -Wall -Wextra -O3 -pthread -Iinclude   -Iexperiments/priority -o bin/priority/server-priorityChunked experiments/priority/server_priorityChunked.c experiments/priority/cache_c.c src/server_helpers.c -pthread  
+cc -Wall -Wextra -O3 -pthread -Iinclude   -Iexperiments/priority -o bin/priority/server-priorityQueue experiments/priority/server_priorityQueue.c experiments/priority/cache_c.c src/server_helpers.c -pthread  
+make: Leaving directory '/tmp/os-priority-batch.nnmjun'

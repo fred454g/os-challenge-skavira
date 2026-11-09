@@ -196,6 +196,8 @@ def run_batch():
                  "experiments/priority/server_priorityChunked.c",
                  "experiments/run-experiment.sh", "get-bin-path.sh"]
         names += [str(p.relative_to(PROJECT)) for p in sorted((PROJECT / "include").glob("*.h"))]
+        names += [str(p.relative_to(PROJECT)) for p in sorted(
+            (PROJECT / "experiments/priority").glob("config.mk"))]
         state["measured_commit"] = subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=PROJECT, text=True).strip()
         state["baseline_commit"] = subprocess.check_output(

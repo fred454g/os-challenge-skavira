@@ -256,6 +256,7 @@ Experiments build on each other: once an experiment's winner is adopted into `se
 | `baseline-v1` | Thread pool adopted into `server.c` | B1: reference for the cache experiment |
 | `exp-cache-measured` | The three cache variants and `baseline-v1`'s `server.c`, exactly as measured | Reproduces every result in `experiments/cache/results/` |
 | `baseline-v2` | Thread pool + cache (variant C) adopted into `server.c` (milestone test: 100 %, score 49 891 887) | B2: reference for the priority experiment |
+| `exp-priority-measured` | Cached FIFO baseline and both priority variants at `842264d`, exactly as measured | Reproduces the baseline-v2 priority comparison |
 
 ## Building
 
@@ -385,6 +386,26 @@ The server logs (`experiments/cache/results/server_logs/`) show where C's lead c
 
 **Conclusion:** Variant C is adopted as the server (`server.c` with `src/cache_c.c` and `include/cache_c.h`, tag `baseline-v2`).
 
-### Priority scheduling (#8) - Freddy??
+### Priority scheduling (#8) - Frederik Holm
 
-Planned: serve high-priority requests first by replacing the pool's FIFO queue with a priority queue.
+**Question:** Does serving high-priority requests first improve the cached thread pool, and does interrupting low-priority work between search chunks improve it further?
+
+| Variant | Source | Mechanism |
+| --- | --- | --- |
+| `baseline_v2` | `server.c` at `baseline-v2` | Thread pool + cache C + FIFO queue |
+| `priorityQueue_cache_v2` | `experiments/priority/server_priorityQueue.c` | Same cache + highest-priority-first queue; FIFO within each priority |
+| `priorityChunked_cache_v2` | `experiments/priority/server_priorityChunked.c` | Same cache + priority queue + cooperative preemption after each 100,000 guesses |
+
+**Setup:** Final client configuration, seeds 1-3, one run per seed and variant, on the same ARM64 server VM with 2 online CPUs and 2 workers. All servers start with an empty cache. The variant order rotates between seeds. Measured server sources are at `842264d` (tag `exp-priority-measured`); frozen build inputs and binary hashes are also saved with the batch.
+
+**Result (median of three seeds, all 4,500 answers correct, lower score is better):**
+
+| Variant | Median score | vs baseline | Median wall time |
+| --- | --- | --- | --- |
+| baseline_v2 | 256 787 689 | - | 755.36 s |
+| **priorityQueue_cache_v2** | **213 473 810** | **-16.9 %** | 758.96 s |
+| priorityChunked_cache_v2 | 215 460 837 | -16.1 % | 754.97 s |
+
+Both priority policies improve the score on every seed. The simple priority queue wins seeds 1 and 2; chunking wins seed 3. Their paired differences are below 1%, and identical-seed repetitions were not performed in this batch, so these measurements do not establish a meaningful performance difference between them. The simple queue has the lowest median and is the simpler implementation. Whole-test duration is similar: priority changes who waits, while all three servers solve the same unique hashes.
+
+Results and per-seed comparisons: [`batch-20261109-182216Z`](experiments/priority/results/batch-20261109-182216Z/). Detailed setup, limitations and follow-up hypotheses: [`experiments/priority/README.md`](experiments/priority/README.md). The older measurements without a cache remain a separate baseline-v1 experiment.

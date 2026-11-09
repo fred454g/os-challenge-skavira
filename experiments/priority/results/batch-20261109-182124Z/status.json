@@ -1,0 +1,30 @@
+{
+  "status": "failed",
+  "started_at": "2026-11-09T18:21:24.608994+00:00",
+  "completed": 0,
+  "total": 9,
+  "settings": {
+    "TOTAL": 500,
+    "START": 0,
+    "DIFFICULTY": 30000000,
+    "REP_PROB_PERCENT": 20,
+    "DELAY_US": 600000,
+    "PRIO_LAMBDA": 1.5
+  },
+  "workers": 2,
+  "measurements": [],
+  "batch_directory": "/Users/frederikholm/Developer/os-challenge-skavira/experiments/priority/results/batch-20261109-182124Z",
+  "server_online_cpus": 2,
+  "measured_commit": "842264d81004906a43734303390871618ce3f96a",
+  "baseline_commit": "000aa266becd7d3ad4090665b8891c3ce342ea4f",
+  "source_archive_sha256": "fd6bf0afdac0491b7174d47e3e317a01aacbe3b613337bae6d22f6c236158fea",
+  "source_archive": "/Users/frederikholm/Developer/os-challenge-skavira/experiments/priority/results/batch-20261109-182124Z/sources.tar.gz",
+  "build_directory": "/tmp/os-priority-batch.nnmjun",
+  "binary_sha256": {
+    "/tmp/os-priority-batch.nnmjun/bin/server-baseline": "4124d917a0a778f216ddb49c6c1552cdf20b6c322c2a167740d6bdd2e05e2606",
+    "/tmp/os-priority-batch.nnmjun/bin/priority/server-priorityQueue": "79475a1748eed9d7b58f763f2c7f131326412456361ce09c678fa47866e91b79",
+    "/tmp/os-priority-batch.nnmjun/bin/priority/server-priorityChunked": "0d5023a9dd9470862addafa385d2665b40fc1f7910929a19b46905fa71bee637"
+  },
+  "error": "RuntimeError: client: sha256sum: /home/vagrant/os-challenge-common/arm64/bin/linux/client: Input/output error ",
+  "finished_at": "2026-11-09T18:21:39.286982+00:00"
+}

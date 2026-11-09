@@ -70,6 +70,50 @@ coordinates fresh servers and frozen builds around that runner. Run its
 top of the two test files; `tests/test_cache_integration.py <build-root>`
 checks all three built servers, including cache hits and in-flight repeats.
 
+## Measured results, 2026-11-09
+
+The completed baseline-v2 batch is `results/batch-20261109-182216Z/`.
+All nine runs returned 500 correct answers (4,500 in total). Median scores:
+
+| Variant | Median score | Reduction vs baseline |
+| --- | --- | --- |
+| baseline_v2 | 256,787,689 | — |
+| priorityQueue_cache_v2 | 213,473,810 | 16.9% |
+| priorityChunked_cache_v2 | 215,460,837 | 16.1% |
+
+The simple queue wins seeds 1 and 2; chunking wins seed 3. Each paired
+difference between the priority variants is below 1%. With one run per seed,
+there is no identical-input replication to separate that difference from
+run-to-run variation. Neither priority variant consistently beats the other.
+Median wall times are 755.36 s (baseline), 758.96 s (queue), and 754.97 s
+(chunks); the weighted score improves without reducing total computation.
+
+Use `batch-summary.csv` for the median comparison, `batch-paired.csv` for
+individual seeds, `batch-latency-by-priority.csv` for count/mean/median/p95/max
+latency in microseconds, and `batch-cache.csv` for cache-hit/wait counts.
+Each seed has the same unique hashes for all three variants: 402, 397, and
+408 respectively. Priority changes the waiting order rather than eliminating
+additional brute-force work.
+
+Aggregating the three seeds, mean latency for priority 1 increases from
+201.10 s (baseline) to 255.41 s (queue), while priority 2 falls from 193.37 s
+to 22.89 s. These levels have 1,171 and 263 responses per variant respectively.
+The lower weighted score comes with a cost to the least urgent requests.
+Priority 5 has only three responses and priority 8 only one, so the rare
+levels do not support a general conclusion about high-priority latency.
+
+The measured source commit is `842264d`, tagged `exp-priority-measured`.
+Every archived build input was verified against that commit. Later raw logs
+can have `-dirty` headers because generated result CSVs changed during the
+batch; their sidecars identify the frozen measured commit and binary hashes.
+The build-dependency correction in `config.mk` and config archiving in the
+runner were added after measurement; they change no server C code or flags.
+
+The initial preparation attempt (`batch-20261109-182124Z`) stopped before
+any client run because reading the shared client binary returned an I/O error
+just after VM resume. Both VMs subsequently read the binary with the expected
+SHA-256, and the complete retry succeeded. The failed attempt is retained.
+
 Do not run another benchmark against port 5003 during the batch. Changes to
 working-tree server sources do not alter the frozen binaries being measured.
 

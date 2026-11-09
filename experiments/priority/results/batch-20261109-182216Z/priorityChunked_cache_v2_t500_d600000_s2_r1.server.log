@@ -1,0 +1,499 @@
+Listening on port 5003 (priority chunks + cache, 2 workers, 100000 guesses/chunk)
+cache hits: 0, waits: 1
+cache hits: 0, waits: 2
+cache hits: 0, waits: 3
+cache hits: 1, waits: 3
+cache hits: 1, waits: 4
+cache hits: 1, waits: 5
+cache hits: 2, waits: 5
+cache hits: 2, waits: 6
+cache hits: 3, waits: 6
+cache hits: 3, waits: 7
+cache hits: 4, waits: 7
+cache hits: 4, waits: 8
+cache hits: 4, waits: 9
+cache hits: 4, waits: 10
+cache hits: 4, waits: 11
+cache hits: 5, waits: 11
+cache hits: 6, waits: 11
+cache hits: 6, waits: 12
+number 3891912525472319017 is correct!
+number 5948993619004795236 is correct!
+number 9136702578193434504 is correct!
+number 5685768695650428377 is correct!
+number 6465365841824317134 is correct!
+number 3524944295492354525 is correct!
+number 4589168502877517079 is correct!
+number 5502909677922130479 is correct!
+number 8206614736969024242 is correct!
+number 1871270848383250141 is correct!
+number 8555152419075676635 is correct!
+number 2473666473174750345 is correct!
+number 8897930618967169584 is correct!
+number 7628049811414017422 is correct!
+number 3022523710906213978 is correct!
+number 6623483670943052193 is correct!
+number 6028263137173684739 is correct!
+number 4998857766837648190 is correct!
+number 5254669020266825119 is correct!
+number 5994124056994470692 is correct!
+number 8751121734910989182 is correct!
+number 3305412918947348215 is correct!
+number 1030041856058679904 is correct!
+number 7254539414188470546 is correct!
+number 3058232950740503336 is correct!
+number 6762250369669835890 is correct!
+number 871cache hits: 6, waits: 13
+cache hits: 6, waits: 14
+cache hits: 7, waits: 14
+cache hits: 7, waits: 15
+cache hits: 7, waits: 16
+cache hits: 7, waits: 17
+cache hits: 7, waits: 18
+cache hits: 8, waits: 18
+cache hits: 9, waits: 18
+cache hits: 10, waits: 18
+cache hits: 11, waits: 18
+cache hits: 11, waits: 19
+cache hits: 11, waits: 20
+2369365392504466 is correct!
+number 6760691021814353021 is correct!
+number 8863270560001197346 is correct!
+number 2317079268237921964 is correct!
+number 859296714997048174 is correct!
+number 8046042694671344701 is correct!
+number 8906533583676233028 is correct!
+number 2010568517835674772 is correct!
+number 700734140792267139 is correct!
+number 7686640157670475335 is correct!
+number 7516372754602857436 is correct!
+number 585233074100475765 is correct!
+number 2900200775509814694 is correct!
+number 1596930963574368543 is correct!
+number 2535291507019870921 is correct!
+number 1133291465930360200 is correct!
+number 883344284854251045 is correct!
+number 1057714124799593444 is correct!
+number 3125907384523517116 is correct!
+number 4380451183062330894 is correct!
+number 532236067577757851 is correct!
+number 6554819255665809775 is correct!
+number 7230154307701577625 is correct!
+number 7549575067048718268 is correct!
+number 6223031150982683413 is correct!
+number 1275007360301914680 is correct!
+number 167420435808435794cache hits: 12, waits: 20
+cache hits: 12, waits: 21
+cache hits: 12, waits: 22
+cache hits: 13, waits: 22
+cache hits: 13, waits: 23
+cache hits: 14, waits: 23
+cache hits: 15, waits: 23
+cache hits: 16, waits: 23
+cache hits: 17, waits: 23
+cache hits: 18, waits: 23
+cache hits: 19, waits: 23
+cache hits: 20, waits: 23
+cache hits: 20, waits: 24
+cache hits: 20, waits: 25
+cache hits: 21, waits: 25
+cache hits: 22, waits: 25
+cache hits: 23, waits: 25
+cache hits: 23, waits: 26
+cache hits: 24, waits: 26
+cache hits: 24, waits: 27
+cache hits: 25, waits: 27
+cache hits: 26, waits: 27
+cache hits: 26, waits: 28
+cache hits: 27, waits: 28
+6 is correct!
+number 6121147791370515209 is correct!
+number 7396147368884921196 is correct!
+number 8698105233752357182 is correct!
+number 536862546728806698 is correct!
+number 6559584327889863800 is correct!
+number 220957617122666889 is correct!
+number 6262157262155762079 is correct!
+number 3819993723518118203 is correct!
+number 7419151337196955295 is correct!
+number 2292448008969874491 is correct!
+number 409893662488976426 is correct!
+number 3506734386035270586 is correct!
+number 5374302327583273654 is correct!
+number 1965496952051055634 is correct!
+number 2667979663476019336 is correct!
+number 6040224668296637098 is correct!
+number 5181958362918808516 is correct!
+number 5259391866149726936 is correct!
+number 3456557713236007433 is correct!
+number 306126023181094508 is correct!
+number 2298155993669407398 is correct!
+number 2787571202672084591 is correct!
+number 2128143746712345423 is correct!
+number 7360065291714943795 is correct!
+number 3040485927255633643 is correct!
+number 6873916741599642802 is correct!
+cache hits: 27, waits: 29
+cache hits: 28, waits: 29
+cache hits: 29, waits: 29
+cache hits: 30, waits: 29
+cache hits: 31, waits: 29
+cache hits: 31, waits: 30
+cache hits: 32, waits: 30
+cache hits: 32, waits: 31
+cache hits: 33, waits: 31
+cache hits: 33, waits: 32
+cache hits: 33, waits: 33
+cache hits: 33, waits: 34
+cache hits: 33, waits: 35
+cache hits: 33, waits: 36
+cache hits: 33, waits: 37
+cache hits: 33, waits: 38
+cache hits: 33, waits: 39
+number 2793781518004704453 is correct!
+number 7618895698711858468 is correct!
+number 2748099327984270483 is correct!
+number 1586139855389285288 is correct!
+number 3336371308736648142 is correct!
+number 1932353701220140509 is correct!
+number 3265170934316171580 is correct!
+number 7341078968997247496 is correct!
+number 8527580841349713344 is correct!
+number 395783191494539630 is correct!
+number 5252454621422564325 is correct!
+number 6681809476221960301 is correct!
+number 2510839818473808371 is correct!
+number 1037320196768992016 is correct!
+number 5705692500215429947 is correct!
+number 4552941308787509627 is correct!
+number 5411393050635835008 is correct!
+number 1436528521993227953 is correct!
+number 1863381543625996556 is correct!
+number 1717463607729336300 is correct!
+number 9026440026922661359 is correct!
+number 4931407144172731146 is correct!
+number 7668845545159841477 is correct!
+number 5032776610095607428 is correct!
+number 7757442443456122754 is correct!
+number 7584507543792523343 is correct!
+number 1578cache hits: 34, waits: 39
+cache hits: 35, waits: 39
+cache hits: 36, waits: 39
+cache hits: 37, waits: 39
+cache hits: 37, waits: 40
+cache hits: 38, waits: 40
+cache hits: 38, waits: 41
+cache hits: 39, waits: 41
+cache hits: 39, waits: 42
+cache hits: 39, waits: 43
+cache hits: 40, waits: 43
+cache hits: 40, waits: 44
+cache hits: 40, waits: 45
+cache hits: 41, waits: 45
+cache hits: 41, waits: 46
+cache hits: 41, waits: 47
+cache hits: 42, waits: 47
+607920340874010 is correct!
+number 1504799814611634602 is correct!
+number 4786789044354245594 is correct!
+number 6813779313577289777 is correct!
+number 3583927516565450811 is correct!
+number 6220800448302305297 is correct!
+number 7577176592313359453 is correct!
+number 866051710203306757 is correct!
+number 4270608338978434366 is correct!
+number 6650925779908624415 is correct!
+number 7439034033141487367 is correct!
+number 3302568163212760497 is correct!
+number 3338043789754059204 is correct!
+number 3333145474167868838 is correct!
+number 3041668464818547482 is correct!
+number 1340569429334851967 is correct!
+number 5319792819079763524 is correct!
+number 789340691885922594 is correct!
+number 6159325270727820880 is correct!
+number 688074034758609906 is correct!
+number 1361856117893539808 is correct!
+number 7975978953324352923 is correct!
+number 3639623822643562118 is correct!
+number 5524407497132423234 is correct!
+number 1975869404177895749 is correct!
+number 7866110948653187157 is correct!
+number 87565006485158599cache hits: 42, waits: 48
+cache hits: 43, waits: 48
+cache hits: 44, waits: 48
+cache hits: 45, waits: 48
+cache hits: 45, waits: 49
+cache hits: 45, waits: 50
+cache hits: 45, waits: 51
+cache hits: 46, waits: 51
+cache hits: 46, waits: 52
+cache hits: 47, waits: 52
+cache hits: 47, waits: 53
+cache hits: 47, waits: 54
+cache hits: 48, waits: 54
+cache hits: 49, waits: 54
+29 is correct!
+number 5404660738068960874 is correct!
+number 1214954963376295575 is correct!
+number 3219501491171928274 is correct!
+number 7094948243986587102 is correct!
+number 898418948430538997 is correct!
+number 8396272842189837655 is correct!
+number 7347835875698804174 is correct!
+number 7663179429988665755 is correct!
+number 4493910788261980842 is correct!
+number 6891866714321669150 is correct!
+number 2254501908247542087 is correct!
+number 1358727311557762944 is correct!
+number 4670128979006236194 is correct!
+number 4826858194229372837 is correct!
+number 791797284499959522 is correct!
+number 1096089970050361258 is correct!
+number 8498806398646449676 is correct!
+number 7409879216243505585 is correct!
+number 4118679032657596613 is correct!
+number 536503478164595499 is correct!
+number 2440898090316811615 is correct!
+number 4042264337021798639 is correct!
+number 4712063704989984322 is correct!
+number 651198218985995556 is correct!
+number 7976632818012831687 is correct!
+number 6695546754621633012 is correct!
+number 8229239377809043557 is correct!
+number 4544903817988421868 is correct!
+number 6246537176218521120 is correct!
+number 1067201465163576697 is correct!
+number 6156995104828568790 is correct!
+number 7270983594780477961 is correct!
+number 1413916008164123465 is correct!
+number 2051074140493073283 is correct!
+number 6505876981977979701 is correct!
+number 326699076352549009 is correct!
+number 8777574979646671612 is correct!
+number 2033573208646087009 is correct!
+number 3336655879858414239 is correct!
+number 5840327759823498349 is correct!
+number 6831872751292039595 is correct!
+number 1507144913019627277 is correct!
+number 6891194853652803877 is correct!
+number 6792049389772370958 is correct!
+number 4825484960179169395 is correct!
+number 7879424677095260800 is correct!
+number 1735089027274306841 is correct!
+number 6887580049146797608 is correct!
+number 3629457084407392246 is correct!
+number 2851924457203516327 is correct!
+number 8091371709752468458 is correct!
+number 8932220142372706896 is correct!
+number 4004317020777850500 is correct!
+number 2008742607473046476 is correct!
+number 6983113248485360526 is correct!
+number 1150779446742841437 is correct!
+number 8637742282983562990 is correct!
+number 5254379695076280929 is correct!
+number 5398307304767282519 is correct!
+number 1968825794777838492 is correct!
+number 6407738400643041009 is correct!
+number 3677621665159473497 is correct!
+number 1967753441980559675 is correct!
+number 638834380790700190 is correct!
+number 8268382533248699244 is correct!
+number 7535792848319886458 is correct!
+number 1102461018257996779 is correct!
+number 3252899393051723646 is correct!
+number 8041782992863685813 is correct!
+number 2878755317036023063 is correct!
+number 2770960077951529038 is correct!
+number 8077764519316477485 is correct!
+number 5707551972144488938 is correct!
+number 5899436730180663677 is correct!
+number 908418384554928612 is correct!
+number 7521524085466797202 is correct!
+number 8267885438886330494 is correct!
+number 3082850967555373261 is correct!
+number 3661077592511009629 is correct!
+number 7032922117345615001 is correct!
+number 1210218997400790824 is correct!
+number 6036893508084467131 is correct!
+number 3536086965644663165 is correct!
+number 1500876888575355553 is correct!
+number 1443118130187561984 is correct!
+number 8656550716556822370 is correct!
+number 6741007011051140745 is correct!
+number 2297864725738202961 is correct!
+number 3881366688926586779 is correct!
+number 3446500073278194878 is correct!
+number 4225441246912933724 is correct!
+number 1394880437561402990 is correct!
+number 3301648571922722563 is correct!
+number 1411479125093042378 is correct!
+number 2327572732661951903 is correct!
+number 1630505475052797635 is correct!
+number 5275016483422973040 is correct!
+number 9016522204675095207 is correct!
+number 3134136207341369840 is correct!
+number 4576017759522355265 is correct!
+number 5026401468690587649 is correct!
+number 4886795211379976053 is correct!
+number 5050882486678968000 is correct!
+number 4827247768962300435 is correct!
+number 1444111806670257121 is correct!
+number 5857844469012352590 is correct!
+number 1776088262918623651 is correct!
+number 3993158540159387489 is correct!
+number 7135918448181447155 is correct!
+number 7078992049340257849 is correct!
+number 6922189380818090719 is correct!
+number 3604901606141040608 is correct!
+number 1497866022661397818 is correct!
+number 7820618368235721876 is correct!
+number 2493764795329147299 is correct!
+number 1615178991468812101 is correct!
+number 4847438475829784046 is correct!
+number 2682592495043234741 is correct!
+number 690497748300435841 is correct!
+number 6880203225431567294 is correct!
+number 8527267068354960466 is correct!
+number 5416265686837739270 is correct!
+number 3760217077748567465 is correct!
+number 7016256436697562928 is correct!
+number 8226643561040940801 is correct!
+number 1799440627291229159 is correct!
+number 1157713662566216257 is correct!
+number 7871671021064512934 is correct!
+number 2435643859029298220 is correct!
+number 2721677371665285044 is correct!
+number 6159525845090014051 is correct!
+number 4629340023410961724 is correct!
+number 8662129691152094537 is correct!
+number 8838714136461013651 is correct!
+number 64242413237279308 is correct!
+number 1329549066896423790 is correct!
+number 3170792777964762797 is correct!
+number 8080831241345555889 is correct!
+number 7165673903184099717 is correct!
+number 4200347128046105664 is correct!
+number 513742633905588703 is correct!
+number 4196004714363072173 is correct!
+number 3139950290595862666 is correct!
+number 5019425440861982666 is correct!
+number 8465040423156785455 is correct!
+number 8518117142918716732 is correct!
+number 189314841872691178 is correct!
+number 8050908230284010809 is correct!
+number 1071178995894369751 is correct!
+number 4022425310475461301 is correct!
+number 829378113944617900 is correct!
+number 2988999886392369630 is correct!
+number 6388882189765965653 is correct!
+number 1460403467591533124 is correct!
+number 1374252048555469925 is correct!
+number 2706849258280088892 is correct!
+number 391023426260663420 is correct!
+number 3963467896600428794 is correct!
+number 6468988942415602766 is correct!
+number 1464600272677797328 is correct!
+number 4924388117817966619 is correct!
+number 5360210579182655178 is correct!
+number 6866159141449336725 is correct!
+number 2854703022243976716 is correct!
+number 6697454462423485317 is correct!
+number 9208361410038300737 is correct!
+number 8655403087970775208 is correct!
+number 3345010200723122606 is correct!
+number 8550309567808954176 is correct!
+number 6648978678354714029 is correct!
+number 1795389041672278966 is correct!
+number 7244893312402160828 is correct!
+number 3128384399379716935 is correct!
+number 7229377039825244072 is correct!
+number 501102884560128690 is correct!
+number 2722835680343290970 is correct!
+number 4189505422549998385 is correct!
+number 1596262938650660560 is correct!
+number 2916851908038295205 is correct!
+number 106132967603123294 is correct!
+number 253718321869320832 is correct!
+number 4085623946583326068 is correct!
+number 9059061475287090263 is correct!
+number 2426044902064065949 is correct!
+number 3137874510577740337 is correct!
+number 7601307703045005999 is correct!
+number 1971956990947492501 is correct!
+number 5415784922492113419 is correct!
+number 2621109307877846659 is correct!
+number 5810507874021538234 is correct!
+number 5702285065502778338 is correct!
+number 5457464647048271670 is correct!
+number 1584294178093627394 is correct!
+number 3904290671873489433 is correct!
+number 3534026905613410979 is correct!
+number 3888215031601786466 is correct!
+number 3545788052301365732 is correct!
+number 3921789416394352283 is correct!
+number 1857064892447474340 is correct!
+number 6868589268880394177 is correct!
+number 2064899630521820865 is correct!
+number 8170176891403867694 is correct!
+number 4068666590567547722 is correct!
+number 628854660783658745 is correct!
+number 7667804930042094224 is correct!
+number 6556922349692472917 is correct!
+number 9027519466822838923 is correct!
+number 7815526477868260863 is correct!
+number 8154187969277221069 is correct!
+number 2679992299225232617 is correct!
+number 3576532711246246517 is correct!
+number 8636450617750521169 is correct!
+number 3207198869393820346 is correct!
+number 2317158208664005922 is correct!
+number 3359312292087176328 is correct!
+number 1825185801903129881 is correct!
+number 2813937134450713777 is correct!
+number 1871338066323607436 is correct!
+number 4743920284854065035 is correct!
+number 2440333468350693930 is correct!
+number 4686727666882188722 is correct!
+number 6220222026192850029 is correct!
+number 8580459422274190437 is correct!
+number 1213886196615364422 is correct!
+number 6223696598955256515 is correct!
+number 5666586724892300662 is correct!
+number 678080202965999747 is correct!
+number 6719711631450393838 is correct!
+number 279524869244335503 is correct!
+number 2460543055828760552 is correct!
+number 2774825276077682851 is correct!
+number 6533928160281100761 is correct!
+number 2762858359222284417 is correct!
+number 7215313430028704945 is correct!
+number 3017783948775262826 is correct!
+number 8101439943117357728 is correct!
+number 2675595337075664669 is correct!
+number 5328957120027580221 is correct!
+number 5284817772105484395 is correct!
+number 1110112858120750553 is correct!
+number 2592510112966122645 is correct!
+number 389225939923928006 is correct!
+number 4258573577458267507 is correct!
+number 8656175340438738889 is correct!
+number 7940013939278099814 is correct!
+number 3990612209943409874 is correct!
+number 4974524822713907564 is correct!
+number 6488267925447362258 is correct!
+number 7922065027697849893 is correct!
+number 1323893385482922482 is correct!
+number 5603492837561067551 is correct!
+number 5138271937090132561 is correct!
+number 1120434837577834554 is correct!
+number 6388901019020492759 is correct!
+number 1612021649926056421 is correct!
+number 8580221476897120829 is correct!
+number 266115947630203463 is correct!
+number 6290338713587217307 is correct!
+number 2756308169185947081 is correct!
+number 4452483908383866331 is correct!
+number 368860730543588945 is correct!
+number 2393386946927466375 is correct!
+number 600936311883430047 is c
