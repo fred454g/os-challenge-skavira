@@ -415,3 +415,5 @@ Across the three seeds, the queue reduces mean priority-2 latency from 193.37 s 
 **Conclusion:** The simple priority queue is adopted into `server.c`, retaining cache C. It has the lowest measured median score and is simpler than chunking, which provides no clear additional gain in these measurements. The cache implementation and SHA-256 code are unchanged.
 
 Raw client results and generated `runs.csv` / `summary.csv` are in [`experiments/priority/results/`](experiments/priority/results/). To reproduce the comparison against cached FIFO, use `exp-priority-measured`: `make baseline` otherwise builds the current priority server from `server.c`.
+
+The original `.time` and `.metadata.json` files for the nine final runs are available in the [results directory at `f0abd60`](https://github.com/fred454g/os-challenge-skavira/tree/f0abd60f39479bd85153d15dae21761c4a6e05d7/experiments/priority/results).
