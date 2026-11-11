@@ -1,0 +1,4 @@
+variant,total,delay,runs,unfinished,min_reliability,median_score,min_score,max_score
+baseline_v2,500,600000,3,0,100.0,256787689,230796837,266143509
+priorityChunked_cache_v2,500,600000,3,0,100.0,215460837,196445623,225565893
+priorityQueue_cache_v2,500,600000,3,0,100.0,213473810,197825024,223626009

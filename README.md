@@ -4,7 +4,7 @@ TCP server for the OS Challenge in course 02159: the client sends a SHA-256 hash
 
 ## Structure
 
-- `server.c`: The submitted server - a **thread pool with a cache for repeated requests**: `main()` starts one worker thread per CPU, then accepts connections, reads each request and looks its hash up in the cache (`cache_c_lookup_or_wait()`). A hit is answered at once, a repeat of a request that is still being computed waits for it, and every other request goes into a FIFO queue. Each worker takes a request, brute-forces it in `handle_client_c()` and answers it together with any repeats waiting for it. The thread pool comes from the concurrency experiment and the cache from the cache experiment (variant C), see [Experiments](#experiments).
+- `server.c`: The submitted server - a **thread pool with cache C and a priority queue**: `main()` starts one worker thread per CPU, accepts connections, reads each request and looks its hash up in the cache (`cache_c_lookup_or_wait()`). A hit is answered at once, a repeat of an unfinished request waits for it, and every other request enters the priority queue. Workers take the highest-priority waiting request (16 highest, 1 lowest), brute-force it in `handle_client_c()` and answer it together with its waiting repeats. Equal priorities keep FIFO order; running work finishes. The pool, cache and priority queue come from the experiments below.
 - `include/server_helpers.h`: `struct request` (the decoded 49-byte request) and declarations of the shared helper functions.
 - `src/server_helpers.c`: The shared helpers used by the server and every experiment variant: `parse_port_or_exit`, `ignore_sigpipe`, `create_listening_socket`, `accept_client`, `read_request`, `find_answer` (brute force with lonesha256), `send_answer` and `handle_client` (one complete request: read → search → reply → close).
 - `include/cache_c.h`, `src/cache_c.c`: The cache used by `server.c`: an array of entries (hash, answer, done flag, and a waiting list of up to 16 client fds), protected by one mutex. Copied from `experiments/cache/` (variant C).
@@ -256,6 +256,7 @@ Experiments build on each other: once an experiment's winner is adopted into `se
 | `baseline-v1` | Thread pool adopted into `server.c` | B1: reference for the cache experiment |
 | `exp-cache-measured` | The three cache variants and `baseline-v1`'s `server.c`, exactly as measured | Reproduces every result in `experiments/cache/results/` |
 | `baseline-v2` | Thread pool + cache (variant C) adopted into `server.c` (milestone test: 100 %, score 49 891 887) | B2: reference for the priority experiment |
+| `exp-priority-measured` | Cached FIFO baseline and both priority variants at `842264d`, exactly as measured | Reproduces the baseline-v2 priority comparison |
 
 ## Building
 
@@ -385,6 +386,34 @@ The server logs (`experiments/cache/results/server_logs/`) show where C's lead c
 
 **Conclusion:** Variant C is adopted as the server (`server.c` with `src/cache_c.c` and `include/cache_c.h`, tag `baseline-v2`).
 
-### Priority scheduling (#8) - Freddy??
+### Priority scheduling (#8) - Frederik Holm Rasmussen (S220768)
 
-Planned: serve high-priority requests first by replacing the pool's FIFO queue with a priority queue.
+**Question:** Does a priority queue lower the cached thread pool's score, and does pausing low-priority work when a more urgent request arrives improve it further?
+
+| Variant | Source | Mechanism |
+| --- | --- | --- |
+| `baseline_v2` | `server.c` at `baseline-v2` | Thread pool + cache C + FIFO queue |
+| `priorityQueue_cache_v2` | `experiments/priority/server_priorityQueue.c` | Same cache + highest-priority-first queue; FIFO within each priority, running work finishes |
+| `priorityChunked_cache_v2` | `experiments/priority/server_priorityChunked.c` | Same cache + priority queue; after each 100,000 guesses, a worker can pause its job for a higher-priority one and resume it later |
+
+Both variants treat 16 as the highest priority and 1 as the lowest. They use the same cache as the baseline, including the waiting list for repeats of unfinished requests.
+
+**Setup:** Final client configuration, seeds 1-3, one run per seed and variant, measured at commit `842264d` (tag `exp-priority-measured`). All nine runs used the same ARM64 server VM with 2 online CPUs and 2 workers. The server was restarted with an empty cache before every run, and the order rotated between seeds: baseline/queue/chunks, queue/chunks/baseline, chunks/baseline/queue. The comparison uses the new cache baseline (`baseline-v2`).
+
+**Result (median of three seeds, all 4,500 answers correct, lower score is better):**
+
+| Variant | Median score | vs baseline |
+| --- | --- | --- |
+| baseline_v2 | 256 787 689 | - |
+| **priorityQueue_cache_v2** | **213 473 810** | **-16.9 %** |
+| priorityChunked_cache_v2 | 215 460 837 | -16.1 % |
+
+Both priority policies improve the score on every seed. The queue wins seeds 1 and 2; chunking wins seed 3. Their differences are below 1% on each seed. Since each seed was run once, that difference cannot be separated from run-to-run variation. Median wall times are similar: 755.36 s for baseline, 758.96 s for the queue and 754.97 s for chunks. All three solve the same unique hashes, so the gain comes from changing who waits.
+
+Across the three seeds, the queue reduces mean priority-2 latency from 193.37 s to 22.89 s, while priority-1 latency increases from 201.10 s to 255.41 s. The lower score comes at the cost of longer waits for the least urgent requests. Rare high-priority levels have too few observations for a general conclusion.
+
+**Conclusion:** The simple priority queue is adopted into `server.c`, retaining cache C. It has the lowest measured median score and is simpler than chunking, which provides no clear additional gain in these measurements. The cache implementation and SHA-256 code are unchanged.
+
+Raw client results and generated `runs.csv` / `summary.csv` are in [`experiments/priority/results/`](experiments/priority/results/). To reproduce the comparison against cached FIFO, use `exp-priority-measured`: `make baseline` otherwise builds the current priority server from `server.c`.
+
+The original `.time` and `.metadata.json` files for the nine final runs are available in the [results directory at `f0abd60`](https://github.com/fred454g/os-challenge-skavira/tree/f0abd60f39479bd85153d15dae21761c4a6e05d7/experiments/priority/results).
